@@ -19,7 +19,10 @@
     </thead>
     <tbody>
       <tr th:each="question : ${questionList}">
-        <td th:text="${question.subject}"></td>
+        <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
+        <td>
+          <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+        </td>
         <td th:text="${question.createDate}"></td>
       </tr>
     </tbody>
