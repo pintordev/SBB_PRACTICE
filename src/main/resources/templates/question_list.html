@@ -6,27 +6,31 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>SBB</title>
-  <link rel="stylesheet" type="text/css" th:href="@{/style.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
 </head>
 <body>
-  <!-- model로 전달된 questionList 데이터로 질문 리스트 출력 -->
-  <!-- 제목 / 작성일시 -->
-  <table>
-    <thead>
+  <div class="container my-3">
+    <!-- model로 전달된 questionList 데이터로 질문 리스트 출력 -->
+    <!-- 제목 / 작성일시 -->
+    <table class="table">
+      <thead class="table-dark">
       <tr>
+        <th>번호</th>
         <th>제목</th>
         <th>작성일시</th>
       </tr>
-    </thead>
-    <tbody>
-      <tr th:each="question : ${questionList}">
+      </thead>
+      <tbody>
+      <tr th:each="question, loop : ${questionList}">
+        <td th:text="${loop.count}"></td>
         <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
         <td>
           <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
         </td>
-        <td th:text="${question.createDate}"></td>
+        <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
       </tr>
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>
