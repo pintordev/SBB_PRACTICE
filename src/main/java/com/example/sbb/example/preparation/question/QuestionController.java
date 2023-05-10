@@ -13,12 +13,12 @@ import java.util.List;
 @Controller
 public class QuestionController {
 
-    private final QuestionRepository questionRepository;
-    // 질문 목록 템플릿 구현
+    // Repository => Service 거쳐가도록 수정
+    private final QuestionService questionService;
 
     @GetMapping("/list")
     public String list(Model model) {
-        List<Question> questionList = this.questionRepository.findAll();
+        List<Question> questionList = this.questionService.getList();
         model.addAttribute("questionList", questionList);
         return "question_list";
     }
