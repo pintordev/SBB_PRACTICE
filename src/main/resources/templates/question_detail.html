@@ -13,5 +13,19 @@
   <h1 th:text="${question.subject}"></h1>
   <!-- 내용 출력 -->
   <div th:text="${question.content}"></div>
+  <!-- 답변 개수 표시 -->
+  <h5 th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+  <!-- 답변 목록 표시 -->
+  <div>
+    <ul>
+      <li th:each="answer : ${question.answerList}" th:text="${answer.content}"></li>
+    </ul>
+  </div>
+  <!-- 답변등록 버튼; 입력이 완료되면 /answer/create/{id}로 이동 -->
+  <form th:action="@{|/answer/create/${question.id}|}" method="post">
+    <!-- 답변 내용을 입력받을 부분 -->
+    <textarea name="content" id="content" cols="30" rows="10"></textarea>
+    <input type="submit" value="답변등록">
+  </form>
 </body>
 </html>
