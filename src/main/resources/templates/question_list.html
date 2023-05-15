@@ -21,6 +21,9 @@
         <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
         <td>
           <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+          <!-- 질문 제목 오른쪽에 작은 글씨로 답변 개수 표기 -->
+          <!-- 질문에 답변이 없을 경우 표기하지 않는다 -->
+          <span th:if="${#lists.size(question.answerList) > 0}" th:text="${#lists.size(question.answerList)}" class="text-danger small ms-2"></span>
         </td>
         <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
       </tr>
