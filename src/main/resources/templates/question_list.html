@@ -14,7 +14,10 @@
       </thead>
       <tbody>
       <tr th:each="question, loop : ${paging}">
-        <td th:text="${loop.count}"></td>
+        <!-- 게시물 번호 역순으로 출력; 총 게시물 수 ~ 총 게시물 수 - (페이징 개수 - 1 ~= loop.index) -->
+        <!-- 페이지 증가 시 처음 오는 번호는 총 게시물 수 - (현재 페이지 * 페이징 개수) -->
+        <!-- 첫번째 페이지 == 0 => 현재 페이지에서 1을 빼지는 않아도 됨 -->
+        <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
         <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
         <td>
           <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
