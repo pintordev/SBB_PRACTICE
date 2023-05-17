@@ -1,6 +1,7 @@
 package com.example.sbb.example.preparation.question;
 
 import com.example.sbb.example.preparation.DataNotFoundException;
+import com.example.sbb.example.preparation.user.SiteUser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -41,11 +42,12 @@ public class QuestionService {
         }
     }
 
-    public void create(String subject, String content) {
+    public void create(String subject, String content, SiteUser author) {
         Question question = new Question();
         question.setSubject(subject);
         question.setContent(content);
         question.setCreateDate(LocalDateTime.now());
+        question.setAuthor(author);
         this.questionRepository.save(question);
     }
 }

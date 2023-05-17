@@ -37,7 +37,8 @@
       <!-- 경고 출력 구문 -->
       <div th:replace="~{form_errors :: formErrorsFragment}"></div>
       <!-- 답변 내용을 입력받을 부분 -->
-      <textarea class="form-control" th:field="*{content}" rows="10"></textarea>
+      <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}" rows="10"></textarea>
+      <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{content}" rows="10"></textarea>
       <input class="btn btn-primary my-2" type="submit" value="답변등록">
     </form>
   </div>
