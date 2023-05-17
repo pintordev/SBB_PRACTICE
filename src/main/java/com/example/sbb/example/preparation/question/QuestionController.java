@@ -99,4 +99,16 @@ public class QuestionController {
         this.questionService.delete(question);
         return "redirect:/";
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    public String voteQuestion(@PathVariable("id") Integer id, Principal principal) {
+        Question question = this.questionService.getQuestion(id);
+        SiteUser voter = this.userService.getUser(principal.getName());
+        if (question.getAuthor().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "본인이 작성한 질문은 추천할 수 없습니다.");
+        }
+        this.questionService.vote(question, voter);
+        return String.format("redirect:/question/detail/%s", id);
+    }
 }

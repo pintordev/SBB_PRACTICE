@@ -78,4 +78,16 @@ public class AnswerController {
         this.answerService.delete(answer);
         return String.format("redirect:/question/detail/%s", answer.getQuestion().getId());
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    public String voteAnswer(@PathVariable("id") Integer id, Principal principal) {
+        Answer answer = this.answerService.getAnswer(id);
+        SiteUser voter = this.userService.getUser(principal.getName());
+        if (answer.getAuthor().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "본인이 작성한 댓글은 추천할 수 없습니다.");
+        }
+        this.answerService.vote(answer, voter);
+        return String.format("redirect:/question/detail/%s", answer.getQuestion().getId());
+    }
 }
