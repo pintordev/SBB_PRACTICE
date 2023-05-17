@@ -2,6 +2,19 @@
 <div layout:fragment="content">
   <!-- 구현 -->
   <div class="container my-3">
+    <div class="row my-3">
+      <!-- 질문 등록 버튼 -->
+      <div class="col-6">
+        <a class="btn btn-primary" th:href="@{/question/create}">질문 등록하기</a>
+      </div>
+      <!-- 검색 창 -->
+      <div class="col-6">
+        <div class="input-group">
+          <input type="text" id="search_keyWord" class="form-control" th:value="${keyWord}">
+          <button type="button" id="btn_search" class="btn btn-outline-secondary">찾기</button>
+        </div>
+      </div>
+    </div>
     <!-- model로 전달된 questionList 데이터로 질문 리스트 출력 -->
     <!-- 제목 / 작성일시 -->
     <table class="table">
@@ -39,19 +52,19 @@
       <ul class="pagination justify-content-center">
         <!-- 처음 버튼 -->
         <li class="page-item" th:classappend="${paging.number == 0} ? 'disabled'">
-          <a class="page-link" th:href="@{?page=0}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${0}">
             <span>처음</span>
           </a>
         </li>
         <!-- 10 페이지 이전 버튼 -->
         <li class="page-item" th:classappend="${paging.number - 10 < 0} ? 'disabled'">
-          <a class="page-link" th:href="@{|?page=${paging.number-10}|}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-10}">
             <span><<</span>
           </a>
         </li>
         <!-- 이전 버튼 -->
         <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
-          <a class="page-link" th:href="@{|?page=${paging.number-1}|}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-1}">
             <span><</span>
           </a>
         </li>
@@ -60,43 +73,53 @@
         <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
             th:if="${page >= paging.number - 2 and page <= paging.number + 2 and paging.number > 1 and paging.number < paging.totalPages-2}"
             th:classappend="${page == paging.number} ? 'active'">
-          <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
+          <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
         </li>
-        <!-- 1, 2 page 일 때 5개 나오도록 -->
+        <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
         <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
-            th:if="${paging.number <= 1 and page <= 4}"
+            th:if="${(paging.number <= 1 and page <= 4) or (paging.number >= paging.totalPages-2 and page >= paging.totalPages-5)}"
             th:classappend="${page == paging.number} ? 'active'">
-          <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
-        </li>
-        <!-- 끝, 끝-1 page 일 때 5개 나오도록 -->
-        <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
-            th:if="${paging.number >= paging.totalPages-2 and page >= paging.totalPages-5}"
-            th:classappend="${page == paging.number} ? 'active'">
-          <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
+          <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
         </li>
         <!-- 다음 버튼 -->
         <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
-          <a class="page-link" th:href="@{|?page=${paging.number+1}|}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+1}">
             <span>></span>
           </a>
         </li>
         <!-- 10페이지 다음 버튼 -->
         <li class="page-item" th:classappend="${paging.number + 10 > paging.totalPages-1} ? 'disabled'">
-          <a class="page-link" th:href="@{|?page=${paging.number+10}|}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+10}">
             <span>>></span>
           </a>
         </li>
         <!-- 끝 버튼 -->
         <li class="page-item" th:classappend="${paging.number == paging.totalPages-1} ? 'disabled'">
-          <a class="page-link" th:href="@{|?page=${paging.totalPages-1}|}">
+          <a class="page-link" href="javascript:void(0);" th:data-page="${paging.totalPages-1}">
             <span>끝</span>
           </a>
         </li>
       </ul>
-
     </div>
-    <!-- 질문 등록 버튼 -->
-    <a class="btn btn-primary" th:href="@{/question/create}">질문 등록하기</a>
+    <form th:action="@{/question/list}" method="get" id="searchForm">
+      <input type="hidden" id="keyWord" name="keyWord" th:value="${keyWord}">
+      <input type="hidden" id="page" name="page" th:value="${paging.number}">
+    </form>
   </div>
 </div>
+<script layout:fragment="script" type='text/javascript'>
+  const page_elements = document.getElementsByClassName("page-link");
+  Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+      document.getElementById('page').value = this.dataset.page;
+      document.getElementById('searchForm').submit();
+    });
+  });
+  const btn_search = document.getElementById("btn_search");
+  btn_search.addEventListener('click', function() {
+    document.getElementById('keyWord').value = document.getElementById('search_keyWord').value;
+    document.getElementById('page').value = 0;
+    document.getElementById('searchForm').submit();
+  });
+</script>
 </html>
