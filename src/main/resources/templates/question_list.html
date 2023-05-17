@@ -32,22 +32,59 @@
     <!-- 페이징 구현 -->
     <div th:if="${!paging.isEmpty()}">
       <ul class="pagination justify-content-center">
+        <!-- 처음 버튼 -->
+        <li class="page-item" th:classappend="${paging.number == 0} ? 'disabled'">
+          <a class="page-link" th:href="@{?page=0}">
+            <span>처음</span>
+          </a>
+        </li>
+        <!-- 10 페이지 이전 버튼 -->
+        <li class="page-item" th:classappend="${paging.number - 10 < 0} ? 'disabled'">
+          <a class="page-link" th:href="@{|?page=${paging.number-10}|}">
+            <span><<</span>
+          </a>
+        </li>
         <!-- 이전 버튼 -->
         <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
           <a class="page-link" th:href="@{|?page=${paging.number-1}|}">
-            <span>이전</span>
+            <span><</span>
           </a>
         </li>
         <!-- 중간 페이지 넘버 버튼 -->
+        <!-- 현재 페이지 기준 +- 2개만 노출 -->
         <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
-            th:if="${page >= paging.number - 2 and page <= paging.number + 2}"
+            th:if="${page >= paging.number - 2 and page <= paging.number + 2 and paging.number > 1 and paging.number < paging.totalPages-2}"
+            th:classappend="${page == paging.number} ? 'active'">
+          <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
+        </li>
+        <!-- 1, 2 page 일 때 5개 나오도록 -->
+        <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
+            th:if="${paging.number <= 1 and page <= 4}"
+            th:classappend="${page == paging.number} ? 'active'">
+          <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
+        </li>
+        <!-- 끝, 끝-1 page 일 때 5개 나오도록 -->
+        <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
+            th:if="${paging.number >= paging.totalPages-2 and page >= paging.totalPages-5}"
             th:classappend="${page == paging.number} ? 'active'">
           <a class="page-link" th:href="@{|?page=${page}|}" th:text="${page+1}"></a>
         </li>
         <!-- 다음 버튼 -->
         <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
           <a class="page-link" th:href="@{|?page=${paging.number+1}|}">
-            <span>다음</span>
+            <span>></span>
+          </a>
+        </li>
+        <!-- 10페이지 다음 버튼 -->
+        <li class="page-item" th:classappend="${paging.number + 10 > paging.totalPages-1} ? 'disabled'">
+          <a class="page-link" th:href="@{|?page=${paging.number+10}|}">
+            <span>>></span>
+          </a>
+        </li>
+        <!-- 끝 버튼 -->
+        <li class="page-item" th:classappend="${paging.number == paging.totalPages-1} ? 'disabled'">
+          <a class="page-link" th:href="@{|?page=${paging.totalPages-1}|}">
+            <span>끝</span>
           </a>
         </li>
       </ul>
