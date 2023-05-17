@@ -38,9 +38,9 @@ public class AnswerController {
             return "question_detail";
         }
         // 답변 저장
-        this.answerService.create(question, answerForm.getContent(), author);
+        Answer answer = this.answerService.create(question, answerForm.getContent(), author);
         // 답변 저장 완료 후, 기존에 있었던 질문 상세 페이지로 리턴
-        return String.format("redirect:/question/detail/%s", question.getId());
+        return String.format("redirect:/question/detail/%s#answer_%s", answer.getQuestion().getId(), answer.getId());
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -65,7 +65,7 @@ public class AnswerController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
         this.answerService.modify(answer, answerForm.getContent());
-        return String.format("redirect:/question/detail/%s", answer.getQuestion().getId());
+        return String.format("redirect:/question/detail/%s#answer_%s", answer.getQuestion().getId(), answer.getId());
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -88,6 +88,6 @@ public class AnswerController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "본인이 작성한 댓글은 추천할 수 없습니다.");
         }
         this.answerService.vote(answer, voter);
-        return String.format("redirect:/question/detail/%s", answer.getQuestion().getId());
+        return String.format("redirect:/question/detail/%s#answer_%s", answer.getQuestion().getId(), answer.getId());
     }
 }
