@@ -3,6 +3,7 @@ package com.example.sbb.example.preparation.question;
 import com.example.sbb.example.preparation.answer.Answer;
 import com.example.sbb.example.preparation.answer.AnswerForm;
 import com.example.sbb.example.preparation.answer.AnswerService;
+import com.example.sbb.example.preparation.comment.CommentForm;
 import com.example.sbb.example.preparation.user.SiteUser;
 import com.example.sbb.example.preparation.user.UserService;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class QuestionController {
 
     // 질문 클릭 시 질문 상세 출력 되도록
     @GetMapping("/detail/{id}") // GetMapping에서 변수로 주소를 설정하는 경우
-    public String detail(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortKeyWord", defaultValue = "createDate") String sortKeyWord, @PathVariable("id") Integer id, AnswerForm answerForm) { // @PathVariable() 로 매개변수를 받아야 함
+    public String detail(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortKeyWord", defaultValue = "createDate") String sortKeyWord, @PathVariable("id") Integer id, AnswerForm answerForm, CommentForm commentForm) { // @PathVariable() 로 매개변수를 받아야 함
         Question question = this.questionService.getQuestion(id);
         model.addAttribute("question", question);
         Page<Answer> paging = this.answerService.getList(question, page, sortKeyWord);

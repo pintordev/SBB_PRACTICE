@@ -2,3 +2,18 @@ a {
     text-decoration: none;
     color: inherit;
 }
+.comment {
+    display: inline-block;
+}
+.comment-author {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.comment-date {
+    font-weight: light;
+    font-size: 0.7rem;
+    margin-right: 0.8rem;
+}
+.comment-content {
+    font-size: 0.8rem;
+}

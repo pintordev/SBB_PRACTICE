@@ -9,50 +9,54 @@
             <div class="card-body">
                 <!-- 내용 출력 -->
                 <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
-                <div class="d-flex justify-content-end">
-                    <div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-                        <!-- 질문 수정일 표기 -->
-                        <div class="mb-2">modified at</div>
-                        <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                <div class="d-flex justify-content-between align-items-end border-bottom py-2">
+                    <div class="button-box">
+                        <!--                    &lt;!&ndash; 질문 추천 버튼 작성자일 경우 비활성화 &ndash;&gt;-->
+                        <!--                    <a href="javascript:void(0);"-->
+                        <!--                       th:data-url="@{|/question/vote/${question.id}|}" sec:authorize="isAuthenticated()"-->
+                        <!--                       class="recommend btn btn-sm btn-outline-secondary"-->
+                        <!--                       th:classappend="${#authentication.getPrincipal().getUsername() == question.author.username} ? 'disabled'">-->
+                        <!--                        <span>추천</span>-->
+                        <!--                        <span th:text="${#lists.size(question.voter)}" class="badge rounded-pill bg-success"></span>-->
+                        <!--                    </a>-->
+                        <!-- 질문 추천 버튼 작성자일 경우 메시지 출력 -->
+                        <a href="javascript:void(0);"
+                           th:data-url="@{|/question/vote/${question.id}|}" sec:authorize="isAuthenticated()"
+                           th:data-author="${question.author.username}"
+                           th:data-principal="${#authentication.getPrincipal().getUsername()}"
+                           th:data-element="${question.getClass().getSimpleName()}"
+                           class="recommend btn btn-sm btn-outline-secondary">
+                            <span>추천</span>
+                            <span th:text="${#lists.size(question.voter)}" class="badge rounded-pill bg-success"></span>
+                        </a>
+                        <!-- 질문 수정 버튼 (작성자가 아니라면 노출 X) -->
+                        <a th:href="@{|/question/modify/${question.id}|}" sec:authorize="isAuthenticated()"
+                           th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                           class="btn btn-sm btn-outline-secondary">수정</a>
+                        <!-- 질문 삭제 버튼 (작성자가 아니라면 노출 X) -->
+                        <a href="javascript:void(0);"
+                           th:data-url="@{|/question/delete/${question.id}|}" sec:authorize="isAuthenticated()"
+                           th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                           class="delete btn btn-sm btn-outline-secondary">삭제</a>
                     </div>
-                    <div class="badge bg-light text-dark p-2 text-start">
-                        <!-- 질문 작성자 표기 (없다면 표기 안함) -->
-                        <div class="mb-2">
-                            <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                    <div class="date-box">
+                        <div th:if="${question.modifyDate != null}"
+                             class="badge bg-light text-dark p-2 text-start mx-3">
+                            <!-- 질문 수정일 표기 -->
+                            <div class="mb-2">modified at</div>
+                            <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
                         </div>
-                        <!-- 질문 등록일 표기 -->
-                        <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        <div class="badge bg-light text-dark p-2 text-start">
+                            <!-- 질문 작성자 표기 (없다면 표기 안함) -->
+                            <div class="mb-2">
+                                <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                            </div>
+                            <!-- 질문 등록일 표기 -->
+                            <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="my-3">
-<!--                    &lt;!&ndash; 질문 추천 버튼 작성자일 경우 비활성화 &ndash;&gt;-->
-<!--                    <a href="javascript:void(0);"-->
-<!--                       th:data-url="@{|/question/vote/${question.id}|}" sec:authorize="isAuthenticated()"-->
-<!--                       class="recommend btn btn-sm btn-outline-secondary"-->
-<!--                       th:classappend="${#authentication.getPrincipal().getUsername() == question.author.username} ? 'disabled'">-->
-<!--                        <span>추천</span>-->
-<!--                        <span th:text="${#lists.size(question.voter)}" class="badge rounded-pill bg-success"></span>-->
-<!--                    </a>-->
-                    <!-- 질문 추천 버튼 작성자일 경우 메시지 출력 -->
-                    <a href="javascript:void(0);"
-                       th:data-url="@{|/question/vote/${question.id}|}" sec:authorize="isAuthenticated()"
-                       th:data-author="${question.author.username}"
-                       th:data-principal="${#authentication.getPrincipal().getUsername()}"
-                       th:data-element="${question.getClass().getSimpleName()}"
-                       class="recommend btn btn-sm btn-outline-secondary">
-                        <span>추천</span>
-                        <span th:text="${#lists.size(question.voter)}" class="badge rounded-pill bg-success"></span>
-                    </a>
-                    <!-- 질문 수정 버튼 (작성자가 아니라면 노출 X) -->
-                    <a th:href="@{|/question/modify/${question.id}|}" sec:authorize="isAuthenticated()"
-                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                       class="btn btn-sm btn-outline-secondary">수정</a>
-                    <!-- 질문 삭제 버튼 (작성자가 아니라면 노출 X) -->
-                    <a href="javascript:void(0);"
-                       th:data-url="@{|/question/delete/${question.id}|}" sec:authorize="isAuthenticated()"
-                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                       class="delete btn btn-sm btn-outline-secondary">삭제</a>
-                </div>
+                <!-- 질문에 달린 댓글 출력 예정 -->
             </div>
         </div>
         <div class="d-flex justify-content-between align-items-end border-bottom my-3 py-2 ">
@@ -73,49 +77,80 @@
             <a th:id="|answer_${answer.id}|"></a>
             <div class="card-body">
                 <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
-                <div class="d-flex justify-content-end">
-                    <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-                        <!-- 답변 수정일 표기 -->
-                        <div class="mb-2">modified at</div>
-                        <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <div class="button-box">
+                        <!--                    &lt;!&ndash; 답변 추천 버튼 작성자일 경우 비활성화 &ndash;&gt;-->
+                        <!--                    <a href="javascript:void(0);"-->
+                        <!--                       th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"-->
+                        <!--                       class="recommend btn btn-sm btn-outline-secondary"-->
+                        <!--                       th:classappend="${#authentication.getPrincipal().getUsername() == answer.author.username} ? 'disabled'">-->
+                        <!--                        <span>추천</span>-->
+                        <!--                        <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>-->
+                        <!--                    </a>-->
+                        <!-- 답변 추천 버튼 작성자일 경우 메시지 출력 -->
+                        <a href="javascript:void(0);"
+                           th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"
+                           th:data-author="${answer.author.username}"
+                           th:data-principal="${#authentication.getPrincipal().getUsername()}"
+                           th:data-element="${answer.getClass().getSimpleName()}"
+                           class="recommend btn btn-sm btn-outline-secondary">
+                            <span>추천</span>
+                            <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>
+                        </a>
+                        <!-- 댓글 버튼 (작성자가 아니라면 노출 X); 버튼 누를 시 댓글 입력 창 오픈 -->
+                        <a href="javascript:void(0);" th:onclick="showCommentForm([[${answer.id}]])"
+                           class="btn btn-sm btn-outline-secondary">댓글
+                        </a>
+                        <!-- 답변 수정 버튼 (작성자가 아니라면 노출 X) -->
+                        <a th:href="@{|/answer/modify/${answer.id}|}" sec:authorize="isAuthenticated()"
+                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                           class="btn btn-sm btn-outline-secondary">수정</a>
+                        <!-- 답변 삭제 버튼 (작성자가 아니라면 노출 X) -->
+                        <a href="javascript:void(0);"
+                           th:data-url="@{|/answer/delete/${answer.id}|}" sec:authorize="isAuthenticated()"
+                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                           class="delete btn btn-sm btn-outline-secondary">삭제</a>
                     </div>
-                    <div class="badge bg-light text-dark p-2 text-start">
-                        <!-- 답변 작성자 표기 (없다면 표기 안함) -->
-                        <div class="mb-2">
-                            <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                    <div class="date-box">
+                        <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark px-2 text-start mx-1">
+                            <!-- 답변 수정일 표기 -->
+                            <div class="mb-2">modified at</div>
+                            <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
                         </div>
-                        <!-- 답변 등록일 표기 -->
-                        <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        <div class="badge bg-light text-dark px-2 text-start">
+                            <!-- 답변 작성자 표기 (없다면 표기 안함) -->
+                            <div class="mb-2">
+                                <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                            </div>
+                            <!-- 답변 등록일 표기 -->
+                            <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                        </div>
                     </div>
+                    <!-- 댓글 작성 폼; 입력이 완료되면 /comment/create/{id}로 이동 -->
+                    <!-- 답변에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
                 </div>
-                <div class="my-3">
-<!--                    &lt;!&ndash; 답변 추천 버튼 작성자일 경우 비활성화 &ndash;&gt;-->
-<!--                    <a href="javascript:void(0);"-->
-<!--                       th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"-->
-<!--                       class="recommend btn btn-sm btn-outline-secondary"-->
-<!--                       th:classappend="${#authentication.getPrincipal().getUsername() == answer.author.username} ? 'disabled'">-->
-<!--                        <span>추천</span>-->
-<!--                        <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>-->
-<!--                    </a>-->
-                    <!-- 답변 추천 버튼 작성자일 경우 메시지 출력 -->
-                    <a href="javascript:void(0);"
-                       th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"
-                       th:data-author="${answer.author.username}"
-                       th:data-principal="${#authentication.getPrincipal().getUsername()}"
-                       th:data-element="${answer.getClass().getSimpleName()}"
-                       class="recommend btn btn-sm btn-outline-secondary">
-                        <span>추천</span>
-                        <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>
+                <form th:id="|comment_form_${answer.id}|" class="border-top mt-3 pt-3" th:action="@{|/comment/create/${answer.id}|}"
+                      th:object="${commentForm}" method="post" style="display: none;">
+                    <!-- 경고 출력 구문 -->
+                    <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                    <!-- 답변 내용을 입력받을 부분 -->
+                    <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
+                              rows="3"></textarea>
+                    <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{content}"
+                              rows="3"></textarea>
+                    <input class="btn btn-sm btn-secondary mt-2" type="submit" value="댓글등록">
+                    <!-- javascript로 내용 없을 때 alert 출력하고 post 보내지 않는 걸로 변경 -->
+                    <a href="javascript:void(0);" th:onclick="hideCommentForm([[${answer.id}]])"
+                       class="btn btn-sm btn-outline-secondary mt-2">취소
                     </a>
-                    <!-- 답변 수정 버튼 (작성자가 아니라면 노출 X) -->
-                    <a th:href="@{|/answer/modify/${answer.id}|}" sec:authorize="isAuthenticated()"
-                       th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
-                       class="btn btn-sm btn-outline-secondary">수정</a>
-                    <!-- 답변 삭제 버튼 (작성자가 아니라면 노출 X) -->
-                    <a href="javascript:void(0);"
-                       th:data-url="@{|/answer/delete/${answer.id}|}" sec:authorize="isAuthenticated()"
-                       th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
-                       class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                </form>
+                <!-- 답변에 달린 댓글 표기 -->
+                <div class="comment-box border-bottom mt-3" th:if="${#lists.size(answer.commentList) > 0}">
+                    <div class="border-top py-2" th:each="comment : ${answer.commentList}">
+                        <div class="comment comment-author" th:text="${comment.author.username}"></div>
+                        <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
+                        <div class="comment comment-content" th:text="${comment.content}"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,6 +221,7 @@
         <!-- 댓글 정렬 기준 요청 form -->
         <form th:action="@{|/question/detail/${question.id}|}" method="get" id="sortForm">
             <input type="hidden" id="sortKeyWord" name="sortKeyWord" th:value="${sortKeyWord}">
+            <input type="hidden" id="page" name="page" th:value="${paging.number}">
         </form>
     </div>
 </div>
@@ -215,16 +251,41 @@
   <!-- 최신순 버튼 클릭 시 실행 메서드 -->
   const btn_sort_recent = document.getElementById("btn_sort_recent");
   btn_sort_recent.addEventListener('click', function() {
-    alert("최신순으로 정렬합니다.");
+<!--    alert("최신순으로 정렬합니다.");-->
     document.getElementById('sortKeyWord').value = "createDate";
     document.getElementById('sortForm').submit();
   });
   <!-- 추천순 버튼 클릭 시 실행 메서드 -->
   const btn_sort_recommend = document.getElementById("btn_sort_recommend");
   btn_sort_recommend.addEventListener('click', function() {
-    alert("추천순으로 정렬합니다.");
+<!--    alert("추천순으로 정렬합니다.");-->
     document.getElementById('sortKeyWord').value = "voter";
     document.getElementById('sortForm').submit();
+  });
+  <!-- 댓글순 버튼 클릭 시 실행 메서드 -->
+  const btn_sort_comment = document.getElementById("btn_sort_comment");
+  btn_sort_comment.addEventListener('click', function() {
+<!--    alert("댓글순으로 정렬합니다.");-->
+    document.getElementById('sortKeyWord').value = "commentList";
+    document.getElementById('sortForm').submit();
+  });
+  <!-- 댓글 버튼 클릭 시 실행 메서드 -->
+  function showCommentForm(id) {
+    console.log('comment_form_' + id);
+    document.getElementById('comment_form_' + id).style.display = "block";
+  }
+  <!-- 댓글 등록 취소 클릭 시 실행 메서드 -->
+  function hideCommentForm(id) {
+    console.log('comment_form_' + id);
+    document.getElementById('comment_form_' + id).style.display = "none";
+  }
+  <!-- 페이지 이동 실행 메서드 -->
+  const page_elements = document.getElementsByClassName("page-link");
+  Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+      document.getElementById('page').value = this.dataset.page;
+      document.getElementById('sortForm').submit();
+    });
   });
 </script>
 </html>

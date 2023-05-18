@@ -27,7 +27,7 @@ public class AnswerController {
     private final UserService userService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping(value = "/create/{id}") // form 태그 method="post"로 요청되므로
+    @PostMapping("/create/{id}") // form 태그 method="post"로 요청되므로
     public String createAnswer(Model model, @PathVariable("id") Integer id, @Valid AnswerForm answerForm, BindingResult bindingResult, Principal principal) { // 요청 시 들어가는 데이터는 @RequestParam 으로
         // 답변을 저장할 질문 객체 불러옴
         Question question = this.questionService.getQuestion(id);
