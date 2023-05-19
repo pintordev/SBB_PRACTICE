@@ -1,6 +1,7 @@
 package com.example.sbb.example.preparation.question;
 
 import com.example.sbb.example.preparation.answer.Answer;
+import com.example.sbb.example.preparation.category.Category;
 import com.example.sbb.example.preparation.user.SiteUser;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -38,4 +39,9 @@ public class Question {
 
     @ManyToMany
     private Set<SiteUser> voter;
+
+    // 글 작성 시 리스트로 선택하도록 해야 됨
+    // 일단 카테고리만 만들고 디폴트는 "질문"
+    @ManyToOne
+    private Category category;
 }

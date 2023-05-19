@@ -2,6 +2,7 @@ package com.example.sbb.example.preparation.question;
 
 import com.example.sbb.example.preparation.DataNotFoundException;
 import com.example.sbb.example.preparation.answer.Answer;
+import com.example.sbb.example.preparation.category.CategoryRepository;
 import com.example.sbb.example.preparation.user.SiteUser;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final CategoryRepository categoryRepository;
 
     private Specification<Question> search(String keyWord) {
         return new Specification<>() {
@@ -66,6 +68,7 @@ public class QuestionService {
         question.setContent(content);
         question.setCreateDate(LocalDateTime.now());
         question.setAuthor(author);
+        question.setCategory(this.categoryRepository.findByType("질문")); // 임시로 나중에 게시판 확장하면 변경 예정
         this.questionRepository.save(question);
     }
 

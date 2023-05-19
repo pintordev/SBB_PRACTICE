@@ -21,6 +21,7 @@
       <thead class="table-secondary">
       <tr class="text-center">
         <th>번호</th>
+        <th>분류</th>
         <th style="width: 50%">제목</th>
         <th>글쓴이</th>
         <th>날짜</th>
@@ -33,6 +34,10 @@
         <!-- 페이지 증가 시 처음 오는 번호는 총 게시물 수 - (현재 페이지 * 페이징 개수) -->
         <!-- 첫번째 페이지 == 0 => 현재 페이지에서 1을 빼지는 않아도 됨 -->
         <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
+        <!-- 게시글 카테고리 -->
+        <td>
+          <span th:if="${question.category != null}" th:text="${question.category.type}"></span>
+        </td>
         <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
         <td class="text-start">
           <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
