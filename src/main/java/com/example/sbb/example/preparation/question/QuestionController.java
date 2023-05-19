@@ -25,7 +25,6 @@ import java.util.List;
 @Controller
 public class QuestionController {
 
-    // Repository => Service 거쳐가도록 수정
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final UserService userService;
@@ -42,9 +41,10 @@ public class QuestionController {
     @GetMapping("/detail/{id}") // GetMapping에서 변수로 주소를 설정하는 경우
     public String detail(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortKeyWord", defaultValue = "createDate") String sortKeyWord, @PathVariable("id") Integer id, AnswerForm answerForm, CommentForm commentForm) { // @PathVariable() 로 매개변수를 받아야 함
         Question question = this.questionService.getQuestion(id);
-        model.addAttribute("question", question);
         Page<Answer> paging = this.answerService.getList(question, page, sortKeyWord);
+        model.addAttribute("question", question);
         model.addAttribute("paging", paging);
+        model.addAttribute("sortKeyWord", sortKeyWord);
         return "question_detail";
     }
 

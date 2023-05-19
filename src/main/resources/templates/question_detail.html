@@ -29,6 +29,8 @@
                             <span>추천</span>
                             <span th:text="${#lists.size(question.voter)}" class="badge rounded-pill bg-success"></span>
                         </a>
+                        <!-- 답변 버튼; 버튼 누를 시 답변 작성 폼으로 이동 -->
+                        <a href="#answerCreate" class="btn btn-sm btn-outline-secondary">답변</a>
                         <!-- 질문 수정 버튼 (작성자가 아니라면 노출 X) -->
                         <a th:href="@{|/question/modify/${question.id}|}" sec:authorize="isAuthenticated()"
                            th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
@@ -89,7 +91,7 @@
                         <!--                    </a>-->
                         <!-- 답변 추천 버튼 작성자일 경우 메시지 출력 -->
                         <a href="javascript:void(0);"
-                           th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"
+                           th:data-url="@{|/answer/vote/${answer.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
                            th:data-author="${answer.author.username}"
                            th:data-principal="${#authentication.getPrincipal().getUsername()}"
                            th:data-element="${answer.getClass().getSimpleName()}"
@@ -102,7 +104,7 @@
                            class="btn btn-sm btn-outline-secondary">댓글
                         </a>
                         <!-- 답변 수정 버튼 (작성자가 아니라면 노출 X) -->
-                        <a th:href="@{|/answer/modify/${answer.id}|}" sec:authorize="isAuthenticated()"
+                        <a th:href="@{|/answer/modify/${answer.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
                            th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
                            class="btn btn-sm btn-outline-secondary">수정</a>
                         <!-- 답변 삭제 버튼 (작성자가 아니라면 노출 X) -->
@@ -126,13 +128,15 @@
                             <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
                         </div>
                     </div>
-                    <!-- 댓글 작성 폼; 입력이 완료되면 /comment/create/{id}로 이동 -->
-                    <!-- 답변에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
                 </div>
-                <form th:id="|comment_form_${answer.id}|" class="border-top mt-3 pt-3" th:action="@{|/comment/create/${answer.id}|}"
-                      th:object="${commentForm}" method="post" style="display: none;">
+                <!-- 댓글 작성 폼; 입력이 완료되면 /comment/create/{id}로 이동 -->
+                <!-- 답변에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
+                <form th:id="|comment_form_${answer.id}|" class="border-top mt-3 pt-3" th:action="@{|/comment/create/${answer.id}/${sortKeyWord}/${paging.number}|}"
+                      th:object="${commentForm}" method="post" th:style="${answerId == answer.id ? 'display: block;' : 'display: none'}">
                     <!-- 경고 출력 구문 -->
-                    <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                    <div th:if="${answerId == answer.id}" >
+                        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                    </div>
                     <!-- 답변 내용을 입력받을 부분 -->
                     <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
                               rows="3"></textarea>
@@ -146,10 +150,38 @@
                 </form>
                 <!-- 답변에 달린 댓글 표기 -->
                 <div class="comment-box border-bottom mt-3" th:if="${#lists.size(answer.commentList) > 0}">
-                    <div class="border-top py-2" th:each="comment : ${answer.commentList}">
-                        <div class="comment comment-author" th:text="${comment.author.username}"></div>
-                        <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
-                        <div class="comment comment-content" th:text="${comment.content}"></div>
+                    <div class="border-top py-2 d-flex justify-content-between align-items-center" th:each="comment : ${answer.commentList}">
+                        <div class="comment-content">
+                            <div class="comment comment-author" th:text="${comment.author.username}"></div>
+                            <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
+                            <div class="comment comment-content" th:text="${comment.content}"></div>
+                        </div>
+                        <div class="comment-btn">
+                            <!-- 댓글 추천 버튼 작성자일 경우 메시지 출력 -->
+                            <a href="javascript:void(0);"
+                               th:data-url="@{|/comment/vote/${comment.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
+                               th:data-author="${comment.author.username}"
+                               th:data-principal="${#authentication.getPrincipal().getUsername()}"
+                               th:data-element="${comment.getClass().getSimpleName()}"
+                               class="recommend btn btn-sm btn-outline-secondary">
+                                <span>추천</span>
+                                <span th:text="${#lists.size(comment.voter)}" class="badge rounded-pill bg-success"></span>
+                            </a>
+                            <!-- 댓글 추천 버튼; 로그인 하지 않았을 경우 추천 수 확인은 가능하도록 -->
+                            <div class="btn btn-sm btn-outline-secondary d-inline-block" sec:authorize="isAnonymous()">
+                                <span>추천</span>
+                                <span th:text="${#lists.size(comment.voter)}" class="badge rounded-pill bg-success"></span>
+                            </div>
+                            <!-- 댓글 수정 버튼 (작성자가 아니라면 노출 X) -->
+                            <a th:href="@{|/comment/modify/${comment.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
+                               th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
+                               class="btn btn-sm btn-outline-secondary">수정</a>
+                            <!-- 댓글 삭제 버튼 (작성자가 아니라면 노출 X) -->
+                            <a href="javascript:void(0);"
+                               th:data-url="@{|/comment/delete/${comment.id}|}" sec:authorize="isAuthenticated()"
+                               th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
+                               class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -209,20 +241,22 @@
             </ul>
         </div>
         <!-- 답변등록 버튼; 입력이 완료되면 /answer/create/{id}로 이동 -->
-        <form class="my-3" th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post">
+        <a th:id="answerCreate"></a>
+        <form class="my-3" th:action="@{|/answer/create/${question.id}/${sortKeyWord}/${paging.number}|}" th:object="${answerForm}" method="post">
             <!-- 경고 출력 구문 -->
             <div th:replace="~{form_errors :: formErrorsFragment}"></div>
             <!-- 답변 내용을 입력받을 부분 -->
             <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
                       rows="10"></textarea>
             <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{content}" rows="10"></textarea>
-            <input class="btn btn-primary my-2" type="submit" value="답변등록">
+            <input class="btn btn-secondary my-2" type="submit" value="답변등록">
         </form>
         <!-- 댓글 정렬 기준 요청 form -->
         <form th:action="@{|/question/detail/${question.id}|}" method="get" id="sortForm">
             <input type="hidden" id="sortKeyWord" name="sortKeyWord" th:value="${sortKeyWord}">
             <input type="hidden" id="page" name="page" th:value="${paging.number}">
         </form>
+        <input type="hidden" name="answerId" th:value="${answerId}">
     </div>
 </div>
 <script layout:fragment="script" type='text/javascript'>
@@ -241,6 +275,8 @@
         if (this.dataset.element == "Question") {
             alert("본인이 작성한 질문은 추천할 수 없습니다.");
         } else if (this.dataset.element == "Answer") {
+            alert("본인이 작성한 답변은 추천할 수 없습니다.");
+        } else if (this.dataset.element == "Comment") {
             alert("본인이 작성한 댓글은 추천할 수 없습니다.");
         };
       } else if(confirm("정말로 추천하시겠습니까?")) {
@@ -271,12 +307,10 @@
   });
   <!-- 댓글 버튼 클릭 시 실행 메서드 -->
   function showCommentForm(id) {
-    console.log('comment_form_' + id);
     document.getElementById('comment_form_' + id).style.display = "block";
   }
   <!-- 댓글 등록 취소 클릭 시 실행 메서드 -->
   function hideCommentForm(id) {
-    console.log('comment_form_' + id);
     document.getElementById('comment_form_' + id).style.display = "none";
   }
   <!-- 페이지 이동 실행 메서드 -->
@@ -286,6 +320,20 @@
       document.getElementById('page').value = this.dataset.page;
       document.getElementById('sortForm').submit();
     });
+  });
+  <!-- 페이지 로드 시 특정 태그로 이동 -->
+  <!-- 입력 오류로 리 렌더링 되었을 때를 위해서 작성 -->
+  $(document).ready(function () {
+    if (window.location.href.includes('/answer/create')) { // 답변 작성 오류로 인한 리 렌더링
+        $('html, body').animate({
+            scrollTop: $('#answerCreate').offset().top
+        }, 'fast');
+    } else if (window.location.href.includes('/comment/create')) { // 댓글 작성 오류로 인한 리 렌더링
+        var id = $('input[name=answerId]').val();
+        $('html, body').animate({
+            scrollTop: $('#answer_' + id).offset().top
+        }, 'fast');
+    }
   });
 </script>
 </html>
