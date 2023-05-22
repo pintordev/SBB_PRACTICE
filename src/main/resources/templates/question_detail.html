@@ -137,9 +137,9 @@
                         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
                     </div>
                     <!-- 답변 내용을 입력받을 부분 -->
-                    <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
+                    <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{commentContent}"
                               rows="3"></textarea>
-                    <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{content}"
+                    <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{commentContent}"
                               rows="3"></textarea>
                     <input class="btn btn-sm btn-secondary mt-2" type="submit" value="댓글등록">
                     <!-- javascript로 내용 없을 때 alert 출력하고 post 보내지 않는 걸로 변경 -->
@@ -149,11 +149,13 @@
                 </form>
                 <!-- 답변에 달린 댓글 표기 -->
                 <div class="comment-box border-bottom mt-3" th:if="${#lists.size(answer.commentList) > 0}">
-                    <div class="border-top py-2 d-flex justify-content-between align-items-center" th:each="comment : ${answer.commentList}">
-                        <div class="comment-content">
-                            <div class="comment comment-author" th:text="${comment.author.username}"></div>
-                            <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
-                            <div class="comment comment-content" th:text="${comment.content}"></div>
+                    <div class="border-top py-2 d-flex justify-content-between" th:each="comment : ${answer.commentList}">
+                        <div class="comment-content d-flex justify-content-start">
+                            <div>
+                                <div class="comment comment-author" th:text="${comment.author.username}"></div>
+                                <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
+                            </div>
+                            <div class="comment comment-content" th:utext="${@commonUtil.markdown(comment.content)}"></div>
                         </div>
                         <div class="comment-btn">
                             <!-- 댓글 추천 버튼 작성자일 경우 메시지 출력 -->
@@ -334,5 +336,6 @@
         }, 'fast');
     }
   });
+  var simplemdeAnswer = new SimpleMDE({ element: document.getElementById("content") });
 </script>
 </html>

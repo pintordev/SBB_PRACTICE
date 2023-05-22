@@ -42,7 +42,7 @@ public class CommentController {
             model.addAttribute("answerId", answer.getId());
             return "question_detail";
         }
-        this.commentService.create(answer, commentForm.getContent(), author);
+        this.commentService.create(answer, commentForm.getCommentContent(), author);
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", answer.getQuestion().getId(), page, answer.getId());
     }
 
@@ -53,7 +53,7 @@ public class CommentController {
         if (!comment.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        commentForm.setContent(comment.getContent());
+        commentForm.setCommentContent(comment.getContent());
         return "comment_form";
     }
 
@@ -67,7 +67,7 @@ public class CommentController {
         if (!comment.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        this.commentService.modify(comment, commentForm.getContent());
+        this.commentService.modify(comment, commentForm.getCommentContent());
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", comment.getAnswer().getQuestion().getId(), page, comment.getAnswer().getId());
     }
 

@@ -11,11 +11,14 @@
       <!-- 내용 적는 영역 -->
       <div class="mb-3">
         <label for="content" class="form-label">내용</label>
-        <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
+        <textarea th:field="*{commentContent}" class="form-control" rows="10"></textarea>
       </div>
       <!-- 저장하기 버튼 -->
       <input class="btn btn-primary my-2" type="submit" value="저장하기">
     </form>
   </div>
 </div>
+<script layout:fragment="script" type='text/javascript'>
+  var simplemdeComment = new SimpleMDE({ element: document.getElementById("commentContent") });
+</script>
 </html>
