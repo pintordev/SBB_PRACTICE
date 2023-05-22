@@ -25,7 +25,8 @@
         <th style="width: 50%">제목</th>
         <th>글쓴이</th>
         <th>날짜</th>
-        <th class="text-success">♥︎</th>
+        <th>조회수</th>
+        <th>♥︎</th>
       </tr>
       </thead>
       <tbody>
@@ -50,7 +51,8 @@
           <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
         </td>
         <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-        <td th:text="${#lists.size(question.voter)}" class="text-success"></td>
+        <td th:text="${question.hit}"></td>
+        <td th:text="${#lists.size(question.voter)}"></td>
       </tr>
       </tbody>
     </table>

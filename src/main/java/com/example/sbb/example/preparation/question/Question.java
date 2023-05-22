@@ -4,6 +4,7 @@ import com.example.sbb.example.preparation.answer.Answer;
 import com.example.sbb.example.preparation.category.Category;
 import com.example.sbb.example.preparation.user.SiteUser;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -44,4 +45,7 @@ public class Question {
     // 일단 카테고리만 만들고 디폴트는 "질문"
     @ManyToOne
     private Category category;
+
+    @Column
+    private Integer hit;
 }

@@ -69,6 +69,7 @@ public class QuestionService {
         question.setCreateDate(LocalDateTime.now());
         question.setAuthor(author);
         question.setCategory(this.categoryRepository.findByType("질문")); // 임시로 나중에 게시판 확장하면 변경 예정
+        question.setHit(0);
         this.questionRepository.save(question);
     }
 
@@ -86,5 +87,12 @@ public class QuestionService {
     public void vote(Question question, SiteUser voter) {
         question.getVoter().add(voter);
         this.questionRepository.save(question);
+    }
+
+    public Question hit(Integer id) {
+        Question question = this.getQuestion(id);
+        question.setHit(question.getHit() + 1);
+        this.questionRepository.save(question);
+        return question;
     }
 }

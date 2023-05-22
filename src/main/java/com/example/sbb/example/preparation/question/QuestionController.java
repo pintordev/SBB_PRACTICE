@@ -6,9 +6,13 @@ import com.example.sbb.example.preparation.answer.AnswerService;
 import com.example.sbb.example.preparation.comment.CommentForm;
 import com.example.sbb.example.preparation.user.SiteUser;
 import com.example.sbb.example.preparation.user.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -39,8 +43,13 @@ public class QuestionController {
 
     // 질문 클릭 시 질문 상세 출력 되도록
     @GetMapping("/detail/{id}") // GetMapping에서 변수로 주소를 설정하는 경우
-    public String detail(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortKeyWord", defaultValue = "createDate") String sortKeyWord, @PathVariable("id") Integer id, AnswerForm answerForm, CommentForm commentForm) { // @PathVariable() 로 매개변수를 받아야 함
-        Question question = this.questionService.getQuestion(id);
+    public String detail(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortKeyWord", defaultValue = "createDate") String sortKeyWord, @PathVariable("id") Integer id, AnswerForm answerForm, CommentForm commentForm, HttpServletRequest request, HttpServletResponse response) { // @PathVariable() 로 매개변수를 받아야 함
+        Question question;
+        if (hitCountJudge(id, request, response)) {
+            question = this.questionService.hit(id);
+        } else {
+            question = this.questionService.getQuestion(id);
+        }
         Page<Answer> paging = this.answerService.getList(question, page, sortKeyWord);
         model.addAttribute("question", question);
         model.addAttribute("paging", paging);
@@ -117,5 +126,49 @@ public class QuestionController {
         }
         this.questionService.vote(question, voter);
         return String.format("redirect:/question/detail/%s", id);
+    }
+
+    private boolean hitCountJudge(Integer id, HttpServletRequest request, HttpServletResponse response) {
+        // 요청 이전 url을 확인해서 제대로 된 게시물 접근인지 확인
+        String refer = request.getHeader("REFERER");
+        String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+        String referUri = refer.replaceFirst(path, "");
+        System.out.println(referUri);
+
+        // 게시판에서 접근한 경우가 아니면 reject
+        if (!referUri.equals("/question/list")) return false;
+
+        Cookie oldCookie = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("questionHit")) {
+                    oldCookie = cookie;
+                }
+            }
+        }
+
+        // 관련 쿠기가 있다면
+        if (oldCookie != null) {
+            // 해당 쿠키가 해당 게시물 id를 조회할 때 생성된 쿠기인지 판단
+            if (!oldCookie.getValue().contains("[" + id + "]")) {
+                // 아니라면 해당 게시물 id를 조회한 결과를 쿠기에 저장
+                oldCookie.setValue(oldCookie.getValue() + "_[" + id + "]");
+                oldCookie.setPath("/");
+                oldCookie.setMaxAge(30); // 지속시간 30초
+                response.addCookie(oldCookie); // 쿠키를 브라우저에 저장
+                return true;
+            }
+            // 맞다면 reject
+            return false;
+        } else {
+            // 쿠키가 없다면 새로 생성해서 해당 게시물 id를 조회한 결과를 쿠기에 저장
+            Cookie newCookie = new Cookie("questionHit","[" + id + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(30); // 지속시간 30초
+            response.addCookie(newCookie); // 쿠키를 브라우저에 저장
+            return true;
+        }
     }
 }
