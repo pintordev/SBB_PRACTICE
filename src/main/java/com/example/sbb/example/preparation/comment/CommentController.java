@@ -3,6 +3,7 @@ package com.example.sbb.example.preparation.comment;
 import com.example.sbb.example.preparation.answer.Answer;
 import com.example.sbb.example.preparation.answer.AnswerForm;
 import com.example.sbb.example.preparation.answer.AnswerService;
+import com.example.sbb.example.preparation.question.Question;
 import com.example.sbb.example.preparation.question.QuestionService;
 import com.example.sbb.example.preparation.user.SiteUser;
 import com.example.sbb.example.preparation.user.UserService;
@@ -29,9 +30,10 @@ public class CommentController {
     private final UserService userService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/create/{id}/{sortKeyWord}/{page}")
-    public String createComment(Model model, @PathVariable("id") Integer id, @PathVariable("sortKeyWord") String sortKeyWord, @PathVariable("page") int page, @Valid CommentForm commentForm, BindingResult bindingResult, Principal principal) {
-        Answer answer = this.answerService.getAnswer(id);
+    @PostMapping("/create/{answerId}/{commentId}/{sortKeyWord}/{page}")
+    public String createComment(Model model, @PathVariable("answerId") Integer answerId, @PathVariable("commentId") Integer commentId, @PathVariable("sortKeyWord") String sortKeyWord, @PathVariable("page") int page, @Valid CommentForm commentForm, BindingResult bindingResult, Principal principal) {
+        Answer answer = this.answerService.getAnswer(answerId);
+        Comment parent = this.commentService.getComment(commentId);
         SiteUser author = this.userService.getUser(principal.getName());
         Page<Answer> paging = this.answerService.getList(answer.getQuestion(), page, sortKeyWord);
         if (bindingResult.hasErrors()) {
@@ -42,7 +44,7 @@ public class CommentController {
             model.addAttribute("answerId", answer.getId());
             return "question_detail";
         }
-        this.commentService.create(answer, commentForm.getCommentContent(), author);
+        this.commentService.create(answer, parent, commentForm.getContent(), author);
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", answer.getQuestion().getId(), page, answer.getId());
     }
 
@@ -53,7 +55,7 @@ public class CommentController {
         if (!comment.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        commentForm.setCommentContent(comment.getContent());
+        commentForm.setContent(comment.getContent());
         return "comment_form";
     }
 
@@ -67,7 +69,7 @@ public class CommentController {
         if (!comment.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        this.commentService.modify(comment, commentForm.getCommentContent());
+        this.commentService.modify(comment, commentForm.getContent());
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", comment.getAnswer().getQuestion().getId(), page, comment.getAnswer().getId());
     }
 
@@ -94,4 +96,13 @@ public class CommentController {
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", comment.getAnswer().getQuestion().getId(), page, comment.getAnswer().getId());
     }
 
+    @PostMapping("/goto")
+    @ResponseBody
+    public String getUri(@RequestParam("id") Integer id) {
+        Comment comment = this.commentService.getComment(id);
+        Answer answer = comment.getAnswer();
+        Question question = answer.getQuestion();
+        int page = this.answerService.getPage(answer.getId(), question);
+        return String.format("/question/detail/%s?page=%s#answer_%s", answer.getQuestion().getId(), page, answer.getId());
+    }
 }

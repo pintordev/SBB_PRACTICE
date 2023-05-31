@@ -1,0 +1,59 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<div layout:fragment="content">
+    <!-- 구현 -->
+    <!-- login form -->
+    <div class="form-container my-3">
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>아이디 찾기</h4>
+            </div>
+        </div>
+        <form>
+            <div id="alert-fail">
+                <div class="alert alert-danger">
+                    이메일을 확인해 주세요.
+                </div>
+            </div>
+            <div id="alert-success">
+                <div class="alert alert-success">
+                    <span>회원가입 시 사용한 ID는</span>
+                    <span id="successId"></span>
+                    <span>입니다.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <input type="email" name="email" id="email" class="form-control" placeholder="가입하실 때 입력하신 이메일을 입력해주세요.">
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" onclick="findUsername();">아이디 찾기</button>
+                <div><a href="/user/login" class="btn btn-secondary">로그인</a></div>
+            </div>
+        </form>
+    </div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+  function findUsername() {
+    $.ajax({
+        url : "/user/find/username",
+        type : "POST",
+        data : {
+          "email" : $("#email").val()
+        },
+        beforeSend : function() {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) { xhr.setRequestHeader(header, token); });
+        },
+        success : function(data) {
+            $("#successId").html(data);
+            $("#alert-fail").css("display", "none");
+            $("#alert-success").css("display", "block");
+        },
+        error : function(data) {
+            $("#alert-success").css("display", "none");
+            $("#alert-fail").css("display", "block");
+        }
+    })
+  }
+</script>
+</html>

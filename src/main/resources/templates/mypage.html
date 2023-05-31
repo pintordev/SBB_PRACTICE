@@ -1,0 +1,374 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<div layout:fragment="content">
+    <!-- 구현 -->
+    <div class="list-container my-3">
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>회원 정보</h4>
+            </div>
+        </div>
+        <table class="table round-top">
+            <tr class="text-start user-info-row">
+                <th style="width:10%">사용자ID</th>
+                <td th:text="${user.username}" class="text-start"></td>
+            </tr>
+            <tr class="text-start user-info-row">
+                <th style="width:10%">이메일</th>
+                <td th:text="${user.email}" class="text-start"></td>
+            </tr>
+            <tr class="text-start user-info-row">
+                <th style="width:10%">가입일</th>
+                <td th:text="${#temporals.format(user.createDate, 'yy.MM.dd HH:mm')}" class="text-start"></td>
+            </tr>
+            <tr class="text-start user-info-row">
+                <th style="width:10%">최근 로그인</th>
+                <td th:text="${#temporals.format(user.lastLoginDate, 'yy.MM.dd HH:mm')}" class="text-start"></td>
+            </tr>
+        </table>
+        <div class="col-6">
+            <a class="btn btn-secondary" th:href="@{/user/modify/password}">비밀번호 변경</a>
+        </div>
+        <a th:id="anchor_question"></a>
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>내가 작성한 글</h4>
+            </div>
+        </div>
+        <!-- 제목 / 작성일시 -->
+        <table class="table round-top">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th>번호</th>
+                <th>분류</th>
+                <th style="width: 50%">제목</th>
+                <th>글쓴이</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-eye"></i></th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="question, loop : ${questionPaging}" class="text-center">
+                <!-- 게시물 번호 역순으로 출력; 총 게시물 수 ~ 총 게시물 수 - (페이징 개수 - 1 ~= loop.index) -->
+                <!-- 페이지 증가 시 처음 오는 번호는 총 게시물 수 - (현재 페이지 * 페이징 개수) -->
+                <!-- 첫번째 페이지 == 0 => 현재 페이지에서 1을 빼지는 않아도 됨 -->
+                <td th:text="${questionPaging.getTotalElements - (questionPaging.number * questionPaging.size) - loop.index}"></td>
+                <!-- 게시글 카테고리 -->
+                <td>
+                    <span th:if="${question.category != null}" th:text="${question.category.type}"></span>
+                </td>
+                <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
+                <td class="text-start">
+                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    <!-- 질문 제목 오른쪽에 작은 글씨로 답변 개수 표기 -->
+                    <!-- 질문에 답변이 없을 경우 표기하지 않는다 -->
+                    <span th:if="${#lists.size(question.answerList) > 0}" th:text="${#lists.size(question.answerList)}"
+                          class="text-danger small ms-2"></span>
+                </td>
+                <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
+                <td>
+                    <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(question.createDate)}"></td>
+                <td th:text="${question.hit}"></td>
+                <td th:text="${#lists.size(question.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- 페이징 구현 -->
+        <div th:if="${!questionPaging.isEmpty()}">
+            <ul class="pagination justify-content-center">
+                <!-- 처음 버튼 -->
+                <li class="page-item" th:classappend="${questionPaging.number == 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'question'}]], [[${0}]])">
+                        <span>처음</span>
+                    </a>
+                </li>
+                <!-- 10 페이지 이전 버튼 -->
+                <li class="page-item" th:classappend="${questionPaging.number - 10 < 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${questionPaging.number-10}]])">
+                        <span><<</span>
+                    </a>
+                </li>
+                <!-- 이전 버튼 -->
+                <li class="page-item" th:classappend="${!questionPaging.hasPrevious} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${questionPaging.number-1}]])">
+                        <span><</span>
+                    </a>
+                </li>
+                <!-- 중간 페이지 넘버 버튼 -->
+                <!-- 현재 페이지 기준 +- 2개만 노출 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, questionPaging.totalPages-1)}"
+                    th:if="${page >= questionPaging.number - 2 and page <= questionPaging.number + 2 and questionPaging.number > 1 and questionPaging.number < questionPaging.totalPages-2}"
+                    th:classappend="${page == questionPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${page}]])" th:text="${page+1}"></a>
+                </li>
+                <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, questionPaging.totalPages-1)}"
+                    th:if="${(questionPaging.number <= 1 and page <= 4) or (questionPaging.number >= questionPaging.totalPages-2 and page >= questionPaging.totalPages-5)}"
+                    th:classappend="${page == questionPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${page}]])" th:text="${page+1}"></a>
+                </li>
+                <!-- 다음 버튼 -->
+                <li class="page-item" th:classappend="${!questionPaging.hasNext} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${questionPaging.number+1}]])">
+                        <span>></span>
+                    </a>
+                </li>
+                <!-- 10페이지 다음 버튼 -->
+                <li class="page-item"
+                    th:classappend="${questionPaging.number + 10 > questionPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${questionPaging.number+10}]])">
+                        <span>>></span>
+                    </a>
+                </li>
+                <!-- 끝 버튼 -->
+                <li class="page-item"
+                    th:classappend="${questionPaging.number == questionPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'question'}]], [[${questionPaging.totalPages-1}]])">
+                        <span>끝</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- 작성한 글 끝 / 작성한 답변 시작 -->
+        <a th:id="anchor_answer"></a>
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>내가 작성한 답변</h4>
+            </div>
+        </div>
+        <table class="table round-top mb-10">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th>번호</th>
+                <th style="width: 50%">내용</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="answer, loop : ${answerPaging}" class="text-center">
+                <td th:text="${answerPaging.getTotalElements - (answerPaging.number * answerPaging.size) - loop.index}"></td>
+                <td class="text-start">
+                    <a href="javascript:void(0);"
+                       th:data-element="answer"
+                       th:data-id="${answer.id}"
+                       th:text="${answer.content}"
+                       class="getPage"></a>
+                    <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
+                          class="text-danger small ms-2"></span>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(answer.createDate)}"></td>
+                <td th:text="${#lists.size(answer.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- 답변 페이징 구현 -->
+        <div th:if="${!answerPaging.isEmpty()}">
+            <ul class="pagination justify-content-center">
+                <!-- 처음 버튼 -->
+                <li class="page-item" th:classappend="${answerPaging.number == 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'answer'}]], [[${0}]])">
+                        <span>처음</span>
+                    </a>
+                </li>
+                <!-- 10 페이지 이전 버튼 -->
+                <li class="page-item" th:classappend="${answerPaging.number - 10 < 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'answer'}]], [[${answerPaging.number-10}]])">
+                        <span><<</span>
+                    </a>
+                </li>
+                <!-- 이전 버튼 -->
+                <li class="page-item" th:classappend="${!answerPaging.hasPrevious} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'answer'}]], [[${answerPaging.number-1}]])">
+                        <span><</span>
+                    </a>
+                </li>
+                <!-- 중간 페이지 넘버 버튼 -->
+                <!-- 현재 페이지 기준 +- 2개만 노출 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, answerPaging.totalPages-1)}"
+                    th:if="${page >= answerPaging.number - 2 and page <= answerPaging.number + 2 and answerPaging.number > 1 and answerPaging.number < answerPaging.totalPages-2}"
+                    th:classappend="${page == answerPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'answer'}]], [[${page}]])"
+                       th:text="${page+1}"></a>
+                </li>
+                <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, answerPaging.totalPages-1)}"
+                    th:if="${(answerPaging.number <= 1 and page <= 4) or (answerPaging.number >= answerPaging.totalPages-2 and page >= answerPaging.totalPages-5)}"
+                    th:classappend="${page == answerPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'answer'}]], [[${page}]])"
+                       th:text="${page+1}"></a>
+                </li>
+                <!-- 다음 버튼 -->
+                <li class="page-item" th:classappend="${!answerPaging.hasNext} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'answer'}]], [[${answerPaging.number+1}]])">
+                        <span>></span>
+                    </a>
+                </li>
+                <!-- 10페이지 다음 버튼 -->
+                <li class="page-item"
+                    th:classappend="${answerPaging.number + 10 > answerPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'answer'}]], [[${answerPaging.number+10}]])">
+                        <span>>></span>
+                    </a>
+                </li>
+                <!-- 끝 버튼 -->
+                <li class="page-item"
+                    th:classappend="${answerPaging.number == answerPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'answer'}]], [[${answerPaging.totalPages-1}]])">
+                        <span>끝</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- 작성한 답변 끝 / 작성한 댓글 시작 -->
+        <a th:id="anchor_comment"></a>
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>내가 작성한 댓글</h4>
+            </div>
+        </div>
+        <table class="table round-top mb-10">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th>번호</th>
+                <th style="width: 50%">내용</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="comment, loop : ${commentPaging}" class="text-center">
+                <td th:text="${commentPaging.getTotalElements - (commentPaging.number * commentPaging.size) - loop.index}"></td>
+                <td class="text-start">
+                    <a href="javascript:void(0);"
+                       th:data-element="comment"
+                       th:data-id="${comment.id}"
+                       th:text="${comment.content}"
+                       class="getPage"></a>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(comment.createDate)}"></td>
+                <td th:text="${#lists.size(comment.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- 댓글 페이징 구현 -->
+        <div th:if="${!commentPaging.isEmpty()}">
+            <ul class="pagination justify-content-center">
+                <!-- 처음 버튼 -->
+                <li class="page-item" th:classappend="${commentPaging.number == 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'comment'}]], [[${0}]])">
+                        <span>처음</span>
+                    </a>
+                </li>
+                <!-- 10 페이지 이전 버튼 -->
+                <li class="page-item" th:classappend="${commentPaging.number - 10 < 0} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'comment'}]], [[${commentPaging.number-10}]])">
+                        <span><<</span>
+                    </a>
+                </li>
+                <!-- 이전 버튼 -->
+                <li class="page-item" th:classappend="${!commentPaging.hasPrevious} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'comment'}]], [[${commentPaging.number-1}]])">
+                        <span><</span>
+                    </a>
+                </li>
+                <!-- 중간 페이지 넘버 버튼 -->
+                <!-- 현재 페이지 기준 +- 2개만 노출 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, commentPaging.totalPages-1)}"
+                    th:if="${page >= commentPaging.number - 2 and page <= commentPaging.number + 2 and commentPaging.number > 1 and commentPaging.number < commentPaging.totalPages-2}"
+                    th:classappend="${page == commentPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'comment'}]], [[${page}]])"
+                       th:text="${page+1}"></a>
+                </li>
+                <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, commentPaging.totalPages-1)}"
+                    th:if="${(commentPaging.number <= 1 and page <= 4) or (commentPaging.number >= commentPaging.totalPages-2 and page >= commentPaging.totalPages-5)}"
+                    th:classappend="${page == commentPaging.number} ? 'active'">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="pageMove([[${'comment'}]], [[${page}]])"
+                       th:text="${page+1}"></a>
+                </li>
+                <!-- 다음 버튼 -->
+                <li class="page-item" th:classappend="${!commentPaging.hasNext} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'comment'}]], [[${commentPaging.number+1}]])">
+                        <span>></span>
+                    </a>
+                </li>
+                <!-- 10페이지 다음 버튼 -->
+                <li class="page-item"
+                    th:classappend="${commentPaging.number + 10 > commentPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'comment'}]], [[${commentPaging.number+10}]])">
+                        <span>>></span>
+                    </a>
+                </li>
+                <!-- 끝 버튼 -->
+                <li class="page-item"
+                    th:classappend="${commentPaging.number == commentPaging.totalPages-1} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0);"
+                       th:onclick="pageMove([[${'comment'}]], [[${commentPaging.totalPages-1}]])">
+                        <span>끝</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <form th:action="@{/user/mypage}" method="get" id="pageForm">
+        <input type="hidden" id="anchor" name="anchor" th:value="${anchor}">
+        <input type="hidden" id="questionPage" name="questionPage" th:value="${questionPaging.number}">
+        <input type="hidden" id="answerPage" name="answerPage" th:value="${answerPaging.number}">
+        <input type="hidden" id="commentPage" name="commentPage" th:value="${commentPaging.number}">
+    </form>
+</div>
+</html>
+<script layout:fragment="script" type='text/javascript'>
+    $(document).ready(function () {
+        var anchor = $('input[name=anchor]').val();
+        $('html, body').animate({
+            scrollTop: $('#anchor_' + anchor).offset().top
+        }, 'fast');
+    });
+  function pageMove(element, page) {
+    $("#anchor").val(element);
+    if (element == "question") $("#questionPage").val(page);
+    if (element == "answer") $("#answerPage").val(page);
+    if (element == "comment") $("#commentPage").val(page);
+    $("#pageForm").submit();
+  }
+  $("a.getPage").click(function() {
+    alert(this.dataset.element);
+    $.ajax({
+        url : "/" + this.dataset.element + "/goto",
+        type : "POST",
+        data : {
+          "id" : this.dataset.id
+        },
+        beforeSend : function() {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) { xhr.setRequestHeader(header, token); });
+        },
+        success : function(data) {
+            location.href = data;
+        },
+        error : function(data) {
+        }
+    })
+  });
+</script>

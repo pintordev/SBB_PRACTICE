@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -34,4 +35,11 @@ public class Comment {
 
     @ManyToMany
     private Set<SiteUser> voter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Comment> children;
 }

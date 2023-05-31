@@ -22,4 +22,9 @@ public class UserCreateForm { // username (3 ~ 25), NotEmpty
     @NotEmpty(message = "이메일은 필수항목입니다")
     @Email
     private String email;
+
+    @NotEmpty(message = "인증번호는 필수항목입니다")
+    private String inputCode;
+
+    private String genCode;
 }

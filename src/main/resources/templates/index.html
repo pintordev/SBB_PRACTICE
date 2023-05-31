@@ -1,0 +1,138 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<div layout:fragment="content">
+    <!-- 구현 -->
+    <div class="list-container my-3">
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>BEST</h4>
+            </div>
+        </div>
+        <!-- model로 전달된 questionList 데이터로 질문 리스트 출력 -->
+        <!-- 제목 / 작성일시 -->
+        <table class="table round-top mb-10">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th>분류</th>
+                <th style="width: 50%">제목</th>
+                <th>글쓴이</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-eye"></i></th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="question : ${questionList}" th:if="${#lists.size(question.voter)} > 0" class="text-center">
+                <!-- 게시글 카테고리 -->
+                <td>
+                    <span th:if="${question.category != null}" th:text="${question.category.type}"></span>
+                </td>
+                <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
+                <td class="text-start">
+                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    <!-- 질문 제목 오른쪽에 작은 글씨로 답변 개수 표기 -->
+                    <!-- 질문에 답변이 없을 경우 표기하지 않는다 -->
+                    <span th:if="${#lists.size(question.answerList) > 0}" th:text="${#lists.size(question.answerList)}"
+                          class="text-danger small ms-2"></span>
+                </td>
+                <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
+                <td>
+                    <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(question.createDate)}"></td>
+                <td th:text="${question.hit}"></td>
+                <td th:text="${#lists.size(question.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>최근 답변</h4>
+            </div>
+        </div>
+        <table class="table round-top mb-10">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th style="width: 50%">내용</th>
+                <th>글쓴이</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="answer : ${answerList}" class="text-center">
+                <!-- 제목 클릭 시 해당 답변이 포함된 질문 상세 페이지로 이동가능하도록 -->
+                <td class="text-start">
+                    <a href="javascript:void(0);"
+                       th:data-element="answer"
+                       th:data-id="${answer.id}"
+                       th:text="${answer.content}"
+                       class="getPage"></a>
+                    <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
+                          class="text-danger small ms-2"></span>
+                </td>
+                <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
+                <td>
+                    <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(answer.createDate)}"></td>
+                <td th:text="${#lists.size(answer.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="my-3 border-bottom">
+            <div>
+                <h4>최근 댓글</h4>
+            </div>
+        </div>
+        <table class="table round-top">
+            <thead class="header-color">
+            <tr class="text-center">
+                <th style="width: 50%">내용</th>
+                <th>글쓴이</th>
+                <th>날짜</th>
+                <th><i class="fa-solid fa-thumbs-up"></i></th>
+            </tr>
+            </thead>
+            <tbody class="content-color">
+            <tr th:each="comment : ${commentList}" class="text-center">
+                <!-- 제목 클릭 시 해당 질문의 상세 페이지로 이동가능하도록 -->
+                <td class="text-start">
+                    <a href="javascript:void(0);"
+                       th:data-element="comment"
+                       th:data-id="${comment.id}"
+                       th:text="${comment.content}"
+                       class="getPage"></a>
+                </td>
+                <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
+                <td>
+                    <span th:if="${comment.author != null}" th:text="${comment.author.username}"></span>
+                </td>
+                <td th:text="${@commonUtil.timeDifference(comment.createDate)}"></td>
+                <td th:text="${#lists.size(comment.voter)}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+  $("a.getPage").click(function() {
+    $.ajax({
+        url : "/" + this.dataset.element + "/goto",
+        type : "POST",
+        data : {
+          "id" : this.dataset.id
+        },
+        beforeSend : function() {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) { xhr.setRequestHeader(header, token); });
+        },
+        success : function(data) {
+            location.href = data;
+        },
+        error : function(data) {
+        }
+    })
+  });
+</script>
+</html>

@@ -1,257 +1,363 @@
 <html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
 <div layout:fragment="content">
     <!-- 구현 -->
-    <div class="container my-3">
+    <div class="list-container my-3">
         <!-- model == question -->
         <div class="card my-3">
             <!-- 제목 출력 -->
             <div class="title-box card-body">
-                <span th:text="${question.category.type}"></span>
-                <span th:text="${question.subject}"></span>
+                <span th:text="${question.category.type}" class="font-title"></span>
+                <div class="d-inline-block w-5"></div>
+                <span th:text="${question.subject}" class="font-weight-bold font-title"></span>
             </div>
-            <div class="article-profile-box card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex justify-content-between align-items-center box-color">
                 <div name="article-profile">
                     <!-- 질문 작성자 표기 -->
-                    <div class="d-inline-block author-box" th:if="${question.author != null}" th:text="${question.author.username}"></div>
+                    <span><i class="fa-solid fa-circle-user"></i></span>
+                    <div class="d-inline-block author-box font-author font-weight-bold"
+                         th:if="${question.author != null}"
+                         th:text="${question.author.username}"></div>
+                    <div class="d-inline-block w-5"></div>
                     <!-- 질문 등록일 표기 -->
                     <div class="d-inline-block date-box">
-                        <span th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd')}"></span>
-                        <span th:if="${question.modifyDate != null}">(수정됨)</span>
+                        <span th:text="${#temporals.format(question.createDate, 'yy.MM.dd HH:mm')}"
+                              class="font-sub"></span>
+                        <span th:if="${question.modifyDate != null}"
+                              th:text="|(수정됨 ${@commonUtil.timeDifference(question.createDate)})|"
+                              class="font-sub"></span>
                     </div>
-                </div>
-                <div name="article-eval">
-                    <span>조회수</span>
-                    <span th:text="${question.hit}"></span>
-                    <a href="javascript:void(0);"
-                       th:data-url="@{|/question/vote/${question.id}|}" sec:authorize="isAuthenticated()"
-                       th:data-author="${question.author.username}"
-                       th:data-principal="${#authentication.getPrincipal().getUsername()}"
-                       th:data-element="${question.getClass().getSimpleName()}"
-                       class="recommend">
-                        <span>♥︎</span>
-                        <span th:text="${#lists.size(question.voter)}"></span>
-                    </a>
-                    <div class="d-inline-block" sec:authorize="isAnonymous()">
-                        <span>추천</span>
-                        <span th:text="${#lists.size(question.voter)}"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- 내용 출력 -->
-                <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
-                <div class="d-flex justify-content-between align-items-end py-2">
-                    <div class="button-box">
-                        <!-- 답변 버튼; 버튼 누를 시 답변 작성 폼으로 이동 -->
-                        <a href="#answerCreate" class="btn btn-sm btn-outline-secondary">답변</a>
+                    <div class="d-inline-block w-5"></div>
+                    <div class="d-inline-block button-box">
                         <!-- 질문 수정 버튼 (작성자가 아니라면 노출 X) -->
                         <a th:href="@{|/question/modify/${question.id}|}" sec:authorize="isAuthenticated()"
                            th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                           class="btn btn-sm btn-outline-secondary">수정</a>
+                           class="font-sub" title="수정"><i class="fa-solid fa-eraser"></i></a>
+                        <div class="d-inline-block w-3"></div>
                         <!-- 질문 삭제 버튼 (작성자가 아니라면 노출 X) -->
                         <a href="javascript:void(0);"
                            th:data-url="@{|/question/delete/${question.id}|}" sec:authorize="isAuthenticated()"
                            th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                           class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                           class="font-sub" title="삭제"><i class="fa-solid fa-trash"></i></a>
                     </div>
                 </div>
-                <!-- 질문에 달린 댓글 출력 예정 -->
+                <div name="article-eval">
+                    <!-- 조회수 -->
+                    <span class="font-sub"><i class="fa-solid fa-eye"></i></span>
+                    <span th:text="${question.hit}" class="font-sub"></span>
+                    <div class="d-inline-block w-5"></div>
+                    <!-- 추천 -->
+                    <div class="d-inline-block">
+                        <span class="font-sub"><i class="fa-solid fa-thumbs-up"></i></span>
+                        <span th:text="${#lists.size(question.voter)}" class="font-sub"></span>
+                    </div>
+                    <div class="d-inline-block w-5"></div>
+                    <!-- 답변 -->
+                    <a href="#answerCreate" class="font-sub" title="답변작성">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <span th:text="${#lists.size(question.answerList)}" class="font-sub"></span>
+                    </a>
+                </div>
             </div>
+            <!-- 내용 출력 및 수정/삭제 버튼 -->
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-end border-bottom my-3 py-2 ">
-                    <!-- 답변 개수 표시 -->
-                    <h5 th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+                <div class="card-text w-95p" th:utext="${@commonUtil.markdown(question.content)}"></div>
+                <div class="text-center">
+                    <a href="javascript:void(0);" sec:authorize="isAuthenticated()"
+                       th:data-url="@{|/question/vote/${question.id}|}"
+                       th:data-author="${question.author.username}"
+                       th:data-principal="${#authentication.getPrincipal().getUsername()}"
+                       th:data-element="${question.getClass().getSimpleName()}"
+                       class="recommend btn btn-secondary" title="추천하기">
+                        <span class="font-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                        <span th:text="${#lists.size(question.voter)}" class="font-sub-white"></span>
+                    </a>
+                    <div class="d-inline-block btn btn-secondary" sec:authorize="isAnonymous()">
+                        <span class="font-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                        <span th:text="${#lists.size(question.voter)}" class="font-sub-white"></span>
+                    </div>
+                </div>
+            </div>
+            <!-- 답변 개수 및 정렬 버튼 -->
+            <div class="card-body d-flex justify-content-between align-items-center box-color">
+                <!-- 답변 개수 표시 -->
+                <div>
+                    <span>답변</span>
+                    <span th:text="${#lists.size(question.answerList)}" class="text-danger"></span>
+                    <div class="d-inline-block w-5"></div>
                     <!-- 최신순, 추천순, 댓글순 -->
-                    <div class="button-box">
+                    <div class="button-box d-inline-block font-none">
                         <!-- 최신순 버튼 -->
-                        <button type="button" id="btn_sort_recent" class="btn btn-sm btn-outline-secondary">최신순</button>
+                        <button type="button" id="btn_sort_recent" class="custom-btn font-sub" title="최신순">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
                         <!-- 추천순 버튼 -->
-                        <button type="button" id="btn_sort_recommend" class="btn btn-sm btn-outline-secondary">추천순</button>
+                        <button type="button" id="btn_sort_recommend" class="custom-btn font-sub" title="추천순">
+                            <i class="fa-solid fa-thumbs-up"></i>
+                        </button>
                         <!-- 댓글순 버튼 -->
-                        <button type="button" id="btn_sort_comment" class="btn btn-sm btn-outline-secondary">댓글순</button>
+                        <button type="button" id="btn_sort_comment" class="custom-btn font-sub" title="댓글순">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </button>
                     </div>
                 </div>
+                <!-- 답변 작성 버튼 -->
+                <div>
+                    <a href="#answerCreate" class="font-color-sub"><i class="fa-solid fa-pen-to-square"></i></a>
+                </div>
             </div>
-        </div>
-        <!-- 답변 목록 표시 -->
-        <div class="card my-3" th:each="answer, loop : ${paging}">
-            <a th:id="|answer_${answer.id}|"></a>
-            <div class="card-body">
-                <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
-                <div class="d-flex justify-content-between align-items-end">
+            <!-- 답변 목록 표시 -->
+            <div th:each="answer, loop : ${paging}">
+                <!-- 답변 앵커 -->
+                <a th:id="|answer_${answer.id}|"></a>
+                <div class="card-body border-bottom">
+                    <div name="answer-profile">
+                        <!-- 답변 작성자 표기 -->
+                        <span><i class="fa-solid fa-circle-user"></i></span>
+                        <div class="d-inline-block author-box font-answer-author font-weight-bold"
+                             th:if="${answer.author != null}"
+                             th:text="${answer.author.username}"></div>
+                        <div class="d-inline-block w-5"></div>
+                        <!-- 답변 등록일 표기 -->
+                        <div class="d-inline-block date-box">
+                                <span th:text="${@commonUtil.timeDifference(answer.createDate)}"
+                                      class="font-answer-sub"></span>
+                            <span th:if="${answer.modifyDate != null}"
+                                  th:text="|(수정됨 ${@commonUtil.timeDifference(answer.modifyDate)})|"
+                                  class="font-answer-sub"></span>
+                        </div>
+                        <div class="d-inline-block w-5"></div>
+                        <div class="d-inline-block button-box">
+                            <!-- 답변 수정 버튼 (작성자가 아니라면 노출 X) -->
+                            <a th:href="@{|/answer/modify/${answer.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
+                               th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                               class="font-sub" title="수정"><i class="fa-solid fa-eraser"></i></a>
+                            <div class="d-inline-block w-3"></div>
+                            <!-- 답변 삭제 버튼 (작성자가 아니라면 노출 X) -->
+                            <a href="javascript:void(0);"
+                               th:data-url="@{|/answer/delete/${answer.id}|}" sec:authorize="isAuthenticated()"
+                               th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                               class="delete font-sub" title="삭제"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </div>
+                    <div class="card-text my-3" th:utext="${@commonUtil.markdown(answer.content)}"></div>
                     <div class="button-box">
-                        <!--                    &lt;!&ndash; 답변 추천 버튼 작성자일 경우 비활성화 &ndash;&gt;-->
-                        <!--                    <a href="javascript:void(0);"-->
-                        <!--                       th:data-url="@{|/answer/vote/${answer.id}|}" sec:authorize="isAuthenticated()"-->
-                        <!--                       class="recommend btn btn-sm btn-outline-secondary"-->
-                        <!--                       th:classappend="${#authentication.getPrincipal().getUsername() == answer.author.username} ? 'disabled'">-->
-                        <!--                        <span>추천</span>-->
-                        <!--                        <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>-->
-                        <!--                    </a>-->
                         <!-- 답변 추천 버튼 작성자일 경우 메시지 출력 -->
                         <a href="javascript:void(0);"
-                           th:data-url="@{|/answer/vote/${answer.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
+                           th:data-url="@{|/answer/vote/${answer.id}/${paging.number}|}"
+                           sec:authorize="isAuthenticated()"
                            th:data-author="${answer.author.username}"
                            th:data-principal="${#authentication.getPrincipal().getUsername()}"
                            th:data-element="${answer.getClass().getSimpleName()}"
-                           class="recommend btn btn-sm btn-outline-secondary">
-                            <span>추천</span>
-                            <span th:text="${#lists.size(answer.voter)}" class="badge rounded-pill bg-success"></span>
+                           class="recommend btn btn-sm btn-secondary" title="추천하기">
+                            <span class="font-answer-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                            <span th:text="${#lists.size(answer.voter)}" class="font-answer-sub-white"></span>
                         </a>
-                        <!-- 댓글 버튼 (작성자가 아니라면 노출 X); 버튼 누를 시 댓글 입력 창 오픈 -->
-                        <a href="javascript:void(0);" th:onclick="showCommentForm([[${answer.id}]])"
-                           class="btn btn-sm btn-outline-secondary">댓글
+                        <!-- 답변 추천 버튼; 로그인 하지 않았을 경우 추천 수 확인은 가능하도록 -->
+                        <div class="btn btn-sm btn-secondary d-inline-block"
+                             sec:authorize="isAnonymous()">
+                            <span class="font-answer-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                            <span th:text="${#lists.size(answer.voter)}" class="font-answer-sub-white"></span>
+                        </div>
+                        <!-- 댓글 버튼; 버튼 누를 시 댓글 입력 창 오픈 -->
+                        <a href="javascript:void(0);" sec:authorize="isAuthenticated()"
+                           th:onclick="showCommentForm([[${answer.id}]])"
+                           class="btn btn-sm btn-secondary comment-btn" title="댓글작성">
+                            <span>댓글</span>
                         </a>
-                        <!-- 답변 수정 버튼 (작성자가 아니라면 노출 X) -->
-                        <a th:href="@{|/answer/modify/${answer.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
-                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
-                           class="btn btn-sm btn-outline-secondary">수정</a>
-                        <!-- 답변 삭제 버튼 (작성자가 아니라면 노출 X) -->
-                        <a href="javascript:void(0);"
-                           th:data-url="@{|/answer/delete/${answer.id}|}" sec:authorize="isAuthenticated()"
-                           th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
-                           class="delete btn btn-sm btn-outline-secondary">삭제</a>
                     </div>
-                    <div class="date-box">
-                        <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark px-2 text-start mx-1">
-                            <!-- 답변 수정일 표기 -->
-                            <div class="mb-2">modified at</div>
-                            <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!-- 댓글 작성 폼; 입력이 완료되면 /comment/create/{id}로 이동 -->
+                    <!-- 답변에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
+                    <form th:id="|comment_form_${answer.id}|" class="pt-3"
+                          th:action="@{|/comment/create/${answer.id}/0/${sortKeyWord}/${paging.number}|}"
+                          th:object="${commentForm}" method="post"
+                          th:style="${answerId == answer.id ? 'display: block;' : 'display: none'}">
+                        <!-- 경고 출력 구문 -->
+                        <div th:if="${answerId == answer.id}">
+                            <div th:replace="~{form_errors :: formErrorsFragment}"></div>
                         </div>
-                        <div class="badge bg-light text-dark px-2 text-start">
-                            <!-- 답변 작성자 표기 (없다면 표기 안함) -->
-                            <div class="mb-2">
-                                <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
-                            </div>
-                            <!-- 답변 등록일 표기 -->
-                            <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
-                        </div>
-                    </div>
+                        <!-- 답변 내용을 입력받을 부분 -->
+                        <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
+                                  rows="3"></textarea>
+                        <textarea sec:authorize="isAuthenticated()" class="form-control add-editor"
+                                  th:field="*{content}"
+                                  rows="3"></textarea>
+                        <input class="btn btn-sm btn-secondary mt-2 add-editor-before" type="submit" value="댓글등록">
+                        <a href="javascript:void(0);" th:onclick="hideCommentForm([[${answer.id}]])"
+                           class="btn btn-sm btn-secondary mt-2">
+                            <span>취소</span>
+                        </a>
+                    </form>
                 </div>
-                <!-- 댓글 작성 폼; 입력이 완료되면 /comment/create/{id}로 이동 -->
-                <!-- 답변에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
-                <form th:id="|comment_form_${answer.id}|" class="border-top mt-3 pt-3" th:action="@{|/comment/create/${answer.id}/${sortKeyWord}/${paging.number}|}"
-                      th:object="${commentForm}" method="post" th:style="${answerId == answer.id ? 'display: block;' : 'display: none'}">
-                    <!-- 경고 출력 구문 -->
-                    <div th:if="${answerId == answer.id}" >
-                        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-                    </div>
-                    <!-- 답변 내용을 입력받을 부분 -->
-                    <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{commentContent}"
-                              rows="3"></textarea>
-                    <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{commentContent}"
-                              rows="3"></textarea>
-                    <input class="btn btn-sm btn-secondary mt-2" type="submit" value="댓글등록">
-                    <!-- javascript로 내용 없을 때 alert 출력하고 post 보내지 않는 걸로 변경 -->
-                    <a href="javascript:void(0);" th:onclick="hideCommentForm([[${answer.id}]])"
-                       class="btn btn-sm btn-outline-secondary mt-2">취소
-                    </a>
-                </form>
-                <!-- 답변에 달린 댓글 표기 -->
-                <div class="comment-box border-bottom mt-3" th:if="${#lists.size(answer.commentList) > 0}">
-                    <div class="border-top py-2 d-flex justify-content-between" th:each="comment : ${answer.commentList}">
-                        <div class="comment-content d-flex justify-content-start">
-                            <div>
-                                <div class="comment comment-author" th:text="${comment.author.username}"></div>
-                                <div class="comment comment-date" th:text="${#temporals.format(comment.createDate, 'yy.MM.dd HH:mm')}"></div>
+                <div th:each="comment : ${answer.commentList}">
+                    <!-- 댓글 앵커 -->
+                    <a th:id="|comment_${comment.id}|"></a>
+                    <div class="card-body border-bottom">
+                        <div class="comment-box">
+                            <div name="comment-profile">
+                                <!-- 댓글 작성자 표기 -->
+                                <span><i class="fa-solid fa-circle-user"></i></span>
+                                <div class="d-inline-block author-box font-answer-author font-weight-bold"
+                                     th:if="${comment.author != null}"
+                                     th:text="${comment.author.username}"></div>
+                                <div class="d-inline-block w-5"></div>
+                                <!-- 댓글 등록일 표기 -->
+                                <div class="d-inline-block date-box">
+                                <span th:text="${@commonUtil.timeDifference(comment.createDate)}"
+                                      class="font-answer-sub"></span>
+                                    <span th:if="${comment.modifyDate != null}"
+                                          th:text="|(수정됨 ${@commonUtil.timeDifference(comment.modifyDate)})|"
+                                          class="font-answer-sub"></span>
+                                </div>
+                                <div class="d-inline-block w-5"></div>
+                                <div class="d-inline-block button-box">
+                                    <!-- 댓글 수정 버튼 (작성자가 아니라면 노출 X) -->
+                                    <a th:href="@{|/comment/modify/${comment.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
+                                       th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
+                                       class="font-sub" title="수정"><i class="fa-solid fa-eraser"></i></a>
+                                    <div class="d-inline-block w-3"></div>
+                                    <!-- 댓글 삭제 버튼 (작성자가 아니라면 노출 X) -->
+                                    <a href="javascript:void(0);"
+                                       th:data-url="@{|/comment/delete/${comment.id}|}" sec:authorize="isAuthenticated()"
+                                       th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
+                                       class="delete font-sub" title="삭제"><i class="fa-solid fa-trash"></i></a>
+                                </div>
                             </div>
-                            <div class="comment comment-content" th:utext="${@commonUtil.markdown(comment.content)}"></div>
-                        </div>
-                        <div class="comment-btn">
-                            <!-- 댓글 추천 버튼 작성자일 경우 메시지 출력 -->
-                            <a href="javascript:void(0);"
-                               th:data-url="@{|/comment/vote/${comment.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
-                               th:data-author="${comment.author.username}"
-                               th:data-principal="${#authentication.getPrincipal().getUsername()}"
-                               th:data-element="${comment.getClass().getSimpleName()}"
-                               class="recommend btn btn-sm btn-outline-secondary">
-                                <span>추천</span>
-                                <span th:text="${#lists.size(comment.voter)}" class="badge rounded-pill bg-success"></span>
-                            </a>
-                            <!-- 댓글 추천 버튼; 로그인 하지 않았을 경우 추천 수 확인은 가능하도록 -->
-                            <div class="btn btn-sm btn-outline-secondary d-inline-block" sec:authorize="isAnonymous()">
-                                <span>추천</span>
-                                <span th:text="${#lists.size(comment.voter)}" class="badge rounded-pill bg-success"></span>
+                            <div th:if="${comment.parent != null}">
+                                <a th:href="@{|#comment_${comment.parent.id}|}" th:text="|@${comment.parent.author.username}|"
+                                   class="font-answer-sub hover-none"></a>
                             </div>
-                            <!-- 댓글 수정 버튼 (작성자가 아니라면 노출 X) -->
-                            <a th:href="@{|/comment/modify/${comment.id}/${paging.number}|}" sec:authorize="isAuthenticated()"
-                               th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
-                               class="btn btn-sm btn-outline-secondary">수정</a>
-                            <!-- 댓글 삭제 버튼 (작성자가 아니라면 노출 X) -->
-                            <a href="javascript:void(0);"
-                               th:data-url="@{|/comment/delete/${comment.id}|}" sec:authorize="isAuthenticated()"
-                               th:if="${comment.author != null and #authentication.getPrincipal().getUsername() == comment.author.username}"
-                               class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                            <div class="card-text my-3" th:utext="${@commonUtil.markdown(comment.content)}"></div>
+                            <div class="button-box">
+                                <!-- 댓글 추천 버튼 작성자일 경우 메시지 출력 -->
+                                <a href="javascript:void(0);"
+                                   th:data-url="@{|/comment/vote/${comment.id}/${paging.number}|}"
+                                   sec:authorize="isAuthenticated()"
+                                   th:data-author="${comment.author.username}"
+                                   th:data-principal="${#authentication.getPrincipal().getUsername()}"
+                                   th:data-element="${comment.getClass().getSimpleName()}"
+                                   class="recommend btn btn-sm btn-secondary" title="추천하기">
+                                    <span class="font-answer-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                                    <span th:text="${#lists.size(comment.voter)}" class="font-answer-sub-white"></span>
+                                </a>
+                                <!-- 댓글 추천 버튼; 로그인 하지 않았을 경우 추천 수 확인은 가능하도록 -->
+                                <div class="btn btn-sm btn-secondary d-inline-block"
+                                     sec:authorize="isAnonymous()">
+                                    <span class="font-answer-sub-white"><i class="fa-solid fa-thumbs-up"></i></span>
+                                    <span th:text="${#lists.size(comment.voter)}" class="font-answer-sub-white"></span>
+                                </div>
+                                <!-- 대댓글 버튼; 버튼 누를 시 댓글 입력 창 오픈 -->
+                                <a href="javascript:void(0);" sec:authorize="isAuthenticated()"
+                                   th:onclick="showReCommentForm([[${comment.id}]])"
+                                   class="btn btn-sm btn-secondary reComment-btn" title="댓글작성">
+                                    <span>댓글</span>
+                                </a>
+                            </div>
+                            <!-- 대댓글 작성 폼; 입력이 완료되면 /comment/create/{answerId}/{commentId}로 이동 -->
+                            <!-- 댓글에 있는 댓글 버튼을 누를 때만 노출. 취소 누를 시에는 다시 사라지도록 -->
+                            <form th:id="|reComment_form_${comment.id}|" class="pt-3"
+                                  th:action="@{|/comment/create/${answer.id}/${comment.id}/${sortKeyWord}/${paging.number}|}"
+                                  th:object="${commentForm}" method="post"
+                                  th:style="${answerId == answer.id ? 'display: block;' : 'display: none'}">
+                                <!-- 경고 출력 구문 -->
+                                <div th:if="${answerId == answer.id}">
+                                    <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                                </div>
+                                <!-- 답변 내용을 입력받을 부분 -->
+                                <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
+                                          rows="3"></textarea>
+                                <textarea sec:authorize="isAuthenticated()" class="form-control add-reComment-editor"
+                                          th:field="*{content}"
+                                          rows="3"></textarea>
+                                <input class="btn btn-sm btn-secondary mt-2 add-editor-before" type="submit" value="댓글등록">
+                                <a href="javascript:void(0);" th:onclick="hideReCommentForm([[${comment.id}]])"
+                                   class="btn btn-sm btn-secondary mt-2">
+                                    <span>취소</span>
+                                </a>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- 페이징 구현 -->
+            <div th:if="${!paging.isEmpty()}" class="card-body">
+                <ul class="pagination justify-content-center">
+                    <!-- 처음 버튼 -->
+                    <li class="page-item" th:classappend="${paging.number == 0} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${0}">
+                            <span>처음</span>
+                        </a>
+                    </li>
+                    <!-- 10 페이지 이전 버튼 -->
+                    <li class="page-item" th:classappend="${paging.number - 10 < 0} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-10}">
+                            <span><<</span>
+                        </a>
+                    </li>
+                    <!-- 이전 버튼 -->
+                    <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-1}">
+                            <span><</span>
+                        </a>
+                    </li>
+                    <!-- 중간 페이지 넘버 버튼 -->
+                    <!-- 현재 페이지 기준 +- 2개만 노출 -->
+                    <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
+                        th:if="${page >= paging.number - 2 and page <= paging.number + 2 and paging.number > 1 and paging.number < paging.totalPages-2}"
+                        th:classappend="${page == paging.number} ? 'active'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
+                    </li>
+                    <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
+                    <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
+                        th:if="${(paging.number <= 1 and page <= 4) or (paging.number >= paging.totalPages-2 and page >= paging.totalPages-5)}"
+                        th:classappend="${page == paging.number} ? 'active'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
+                    </li>
+                    <!-- 다음 버튼 -->
+                    <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+1}">
+                            <span>></span>
+                        </a>
+                    </li>
+                    <!-- 10페이지 다음 버튼 -->
+                    <li class="page-item" th:classappend="${paging.number + 10 > paging.totalPages-1} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+10}">
+                            <span>>></span>
+                        </a>
+                    </li>
+                    <!-- 끝 버튼 -->
+                    <li class="page-item" th:classappend="${paging.number == paging.totalPages-1} ? 'disabled'">
+                        <a class="page-link" href="javascript:void(0);" th:data-page="${paging.totalPages-1}">
+                            <span>끝</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- 답변등록 버튼; 입력이 완료되면 /answer/create/{id}로 이동 -->
+            <div class="card-body">
+                <a th:id="answerCreate"></a>
+                <div sec:authorize="isAnonymous" class="mb-3 text-center">
+                    <div>
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        <span>답변은 로그인 후 작성 가능합니다.</span>
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                    <div class="mt-3">
+                        <a th:href="@{/user/login}" class="btn btn-sm btn-secondary">로그인</a>
+                        <a th:href="@{/user/signup}" class="btn btn-sm btn-secondary">회원가입</a>
+                    </div>
+                </div>
+                <form sec:authorize="isAuthenticated()"
+                      th:action="@{|/answer/create/${question.id}/${sortKeyWord}/${paging.number}|}"
+                      th:object="${answerForm}" method="post">
+                    <!-- 경고 출력 구문 -->
+                    <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+                    <!-- 답변 내용을 입력받을 부분 -->
+                    <textarea class="form-control answerEditor" th:field="*{content}"
+                              rows="10"></textarea>
+                    <input class="btn btn-secondary my-2" type="submit" value="답변등록">
+                </form>
+            </div>
         </div>
-        <!-- 페이징 구현 -->
-        <div th:if="${!paging.isEmpty()}">
-            <ul class="pagination justify-content-center">
-                <!-- 처음 버튼 -->
-                <li class="page-item" th:classappend="${paging.number == 0} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${0}">
-                        <span>처음</span>
-                    </a>
-                </li>
-                <!-- 10 페이지 이전 버튼 -->
-                <li class="page-item" th:classappend="${paging.number - 10 < 0} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-10}">
-                        <span><<</span>
-                    </a>
-                </li>
-                <!-- 이전 버튼 -->
-                <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number-1}">
-                        <span><</span>
-                    </a>
-                </li>
-                <!-- 중간 페이지 넘버 버튼 -->
-                <!-- 현재 페이지 기준 +- 2개만 노출 -->
-                <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
-                    th:if="${page >= paging.number - 2 and page <= paging.number + 2 and paging.number > 1 and paging.number < paging.totalPages-2}"
-                    th:classappend="${page == paging.number} ? 'active'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
-                </li>
-                <!-- 1, 2, 끝-1, 끝 page 일 때일 때 5개 나오도록 -->
-                <li class="page-item" th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
-                    th:if="${(paging.number <= 1 and page <= 4) or (paging.number >= paging.totalPages-2 and page >= paging.totalPages-5)}"
-                    th:classappend="${page == paging.number} ? 'active'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${page}" th:text="${page+1}"></a>
-                </li>
-                <!-- 다음 버튼 -->
-                <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+1}">
-                        <span>></span>
-                    </a>
-                </li>
-                <!-- 10페이지 다음 버튼 -->
-                <li class="page-item" th:classappend="${paging.number + 10 > paging.totalPages-1} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${paging.number+10}">
-                        <span>>></span>
-                    </a>
-                </li>
-                <!-- 끝 버튼 -->
-                <li class="page-item" th:classappend="${paging.number == paging.totalPages-1} ? 'disabled'">
-                    <a class="page-link" href="javascript:void(0);" th:data-page="${paging.totalPages-1}">
-                        <span>끝</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <!-- 답변등록 버튼; 입력이 완료되면 /answer/create/{id}로 이동 -->
-        <a th:id="answerCreate"></a>
-        <form class="my-3" th:action="@{|/answer/create/${question.id}/${sortKeyWord}/${paging.number}|}" th:object="${answerForm}" method="post">
-            <!-- 경고 출력 구문 -->
-            <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-            <!-- 답변 내용을 입력받을 부분 -->
-            <textarea sec:authorize="isAnonymous()" disabled class="form-control" th:field="*{content}"
-                      rows="10"></textarea>
-            <textarea sec:authorize="isAuthenticated()" class="form-control" th:field="*{content}" rows="10"></textarea>
-            <input class="btn btn-secondary my-2" type="submit" value="답변등록">
-        </form>
         <!-- 댓글 정렬 기준 요청 form -->
         <form th:action="@{|/question/detail/${question.id}|}" method="get" id="sortForm">
             <input type="hidden" id="sortKeyWord" name="sortKeyWord" th:value="${sortKeyWord}">
@@ -308,11 +414,41 @@
   });
   <!-- 댓글 버튼 클릭 시 실행 메서드 -->
   function showCommentForm(id) {
-    document.getElementById('comment_form_' + id).style.display = "block";
+    $('#comment_form_' + id).children(".add-editor").addClass("commentEditor");
+    var simplemdeComment = new SimpleMDE({ element: $(".commentEditor")[0] });
+    $('#comment_form_' + id).css("display", "block");
+    $('#comment_form_' + id).children("div.CodeMirror").addClass("comment-Code");
+    $('#comment_form_' + id).children("div.CodeMirror").children("div.CodeMirror-scroll").addClass("comment-Code");
+    $('.comment-btn').css("display", "none");
   }
   <!-- 댓글 등록 취소 클릭 시 실행 메서드 -->
   function hideCommentForm(id) {
-    document.getElementById('comment_form_' + id).style.display = "none";
+    $('#comment_form_' + id).children(".add-editor").removeClass("commentEditor");
+    $('#comment_form_' + id).children(".editor-toolbar").remove();
+    $('#comment_form_' + id).children(".CodeMirror").remove();
+    $('#comment_form_' + id).children(".editor-preview-side").remove();
+    $('#comment_form_' + id).children(".editor-statusbar").remove();
+    $('#comment_form_' + id).css("display", "none");
+    $('.comment-btn').css("display", "");
+  }
+  <!-- 댓글 버튼 클릭 시 실행 메서드 -->
+  function showReCommentForm(id) {
+    $('#reComment_form_' + id).children(".add-reComment-editor").addClass("reCommentEditor");
+    var simplemdeComment = new SimpleMDE({ element: $(".reCommentEditor")[0] });
+    $('#reComment_form_' + id).css("display", "block");
+    $('#reComment_form_' + id).children("div.CodeMirror").addClass("comment-Code");
+    $('#reComment_form_' + id).children("div.CodeMirror").children("div.CodeMirror-scroll").addClass("comment-Code");
+    $('.reComment-btn').css("display", "none");
+  }
+  <!-- 대댓글 등록 취소 클릭 시 실행 메서드 -->
+  function hideReCommentForm(id) {
+    $('#reComment_form_' + id).children(".add-reComment-editor").removeClass("reCommentEditor");
+    $('#reComment_form_' + id).children(".editor-toolbar").remove();
+    $('#reComment_form_' + id).children(".CodeMirror").remove();
+    $('#reComment_form_' + id).children(".editor-preview-side").remove();
+    $('#reComment_form_' + id).children(".editor-statusbar").remove();
+    $('#reComment_form_' + id).css("display", "none");
+    $('.reComment-btn').css("display", "");
   }
   <!-- 페이지 이동 실행 메서드 -->
   const page_elements = document.getElementsByClassName("page-link");
@@ -331,11 +467,18 @@
         }, 'fast');
     } else if (window.location.href.includes('/comment/create')) { // 댓글 작성 오류로 인한 리 렌더링
         var id = $('input[name=answerId]').val();
+        $('#comment_form_' + id).children(".add-editor").addClass("commentEditor");
+        var simplemdeComment = new SimpleMDE({ element: $(".commentEditor")[0] });
+        $('#comment_form_' + id).css("display", "block");
+        $('#comment_form_' + id).children("div.CodeMirror").addClass("comment-Code");
+        $('#comment_form_' + id).children("div.CodeMirror").children("div.CodeMirror-scroll").addClass("comment-Code");
+        $('.comment-btn').css("display", "none");
         $('html, body').animate({
             scrollTop: $('#answer_' + id).offset().top
         }, 'fast');
     }
   });
-  var simplemdeAnswer = new SimpleMDE({ element: document.getElementById("content") });
+  var simplemdeAnswer = new SimpleMDE({ element: $(".answerEditor")[0] });
+
 </script>
 </html>

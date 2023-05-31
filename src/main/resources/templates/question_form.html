@@ -1,8 +1,8 @@
 <html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
 <div layout:fragment="content">
     <!-- 구현 -->
-    <div class="container">
-        <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <div class="list-container">
+        <h4 class="my-3 border-bottom pb-2">글쓰기</h4>
         <!-- 질문 등록 form; subject & content & 저장하기 버튼 -->
         <form th:object="${questionForm}" method="post">
             <!-- CSRF 값 수동 설정, th:action 불필요 -->
@@ -10,21 +10,22 @@
             <!-- 경고 발생 시 경고 출력 영역 -->
             <div th:replace="~{form_errors :: formErrorsFragment}"></div>
             <!-- 제목 적는 영역 -->
-            <div class="mb-3">
-                <label for="subject" class="form-label">제목</label>
-                <input type="text" th:field="*{subject}" class="form-control">
+            <div class="mb-3 d-flex">
+                <select th:field="*{category}" class="form-select w-20p me-2" aria-label="Default select example">
+                    <option th:each="cat : ${categories}" th:value="${cat.type}" th:text="${cat.type}"></option>
+                </select>
+                <input type="text" th:field="*{subject}" class="form-control d-inline-block" placeholder="제목">
             </div>
             <!-- 내용 적는 영역 -->
             <div class="mb-3">
-                <label for="content" class="form-label">내용</label>
                 <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
             </div>
             <!-- 저장하기 버튼 -->
-            <input class="btn btn-primary my-2" type="submit" value="저장하기">
+            <input class="btn btn-secondary my-2" type="submit" value="저장하기">
         </form>
     </div>
 </div>
 <script layout:fragment="script" type='text/javascript'>
-  var simplemdeComment = new SimpleMDE({ element: document.getElementById("commentContent") });
+  var simplemdeComment = new SimpleMDE({ element: document.getElementById("content") });
 </script>
 </html>

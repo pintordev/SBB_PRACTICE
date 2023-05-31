@@ -2,6 +2,9 @@ a {
     text-decoration: none;
     color: inherit;
 }
+a.hover-none:hover {
+    color: rgb(128, 128, 128);
+}
 .comment {
     display: inline-block;
 }
@@ -16,6 +19,9 @@ a {
 }
 .comment-content {
     font-size: 0.8rem;
+}
+.comment-box {
+    margin-left: 3rem;
 }
 
 .page-link {
@@ -36,6 +42,160 @@ a {
   background-color: #fafafa;
   border-color: #ccc;
 }
-.article-profile-box {
-    background-color: #fafafa;
+.comment-Code {
+	min-height: 80px;
+}
+
+* {
+	font-family: "Noto Sans KR", sans-serif;
+}
+body {
+	color: rgb(50, 50, 50);
+}
+.header-color {
+	background-color: rgb(198, 224, 180);
+}
+.body-color {
+	background-color: rgb(242, 242, 242);
+}
+.box-color {
+    background-color: rgb(226, 239, 218);
+}
+.content-color {
+	background-color: rgb(255, 255, 255);
+}
+
+.form-container {
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+@media (min-width: 500px) {
+	.form-container {
+		width: 100%;
+	}
+}
+
+@media (min-width: 700px) {
+	.form-container {
+		width: 500px;
+	}
+}
+
+.list-container {
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+@media (min-width: 500px) {
+	.list-container {
+		width: 100%;
+	}
+}
+
+@media (min-width: 768px) {
+	.list-container {
+		width: 700px;
+	}
+}
+
+@media (min-width: 992px) {
+	.list-container {
+		width: 900px;
+	}
+}
+
+@media (min-width: 1200px) {
+	.list-container {
+		width: 1000px;
+	}
+}
+.round-top {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+.font-none {
+    font-size: 0;
+}
+.font-weight-bold {
+    font-weight: bold;
+}
+.font-title {
+    font-size: 1.2rem;
+}
+.font-author {
+    font-size: 1.1rem;
+}
+.font-answer-author {
+    font-size: .9rem;
+}
+.font-normal {
+    font-size: 1rem;
+}
+.font-sub {
+    font-size: .9rem;
+    color: rgb(128, 128, 128);
+}
+.font-sub-white {
+    font-size: .9rem;
+    color: rgb(255, 255, 255);
+}
+.font-color-sub {
+    color: rgb(128, 128, 128);
+}
+.font-answer-sub {
+    font-size: .75rem;
+    color: rgb(128, 128, 128);
+}
+.font-answer-sub-white {
+    font-size: .75rem;
+    color: rgb(255, 255, 255);
+}
+.w-5 {
+    width: .5rem;
+}
+.w-20p {
+    width: 20%;
+}
+.w-25p {
+    width: 25%;
+}
+.w-30p {
+    width: 30%;
+}
+.w-70p {
+    width: 70%;
+}
+.w-95p {
+    width: 95%;
+}
+.custom-btn {
+    border: none;
+}
+.user-info-head, .user-info-content {
+    height: 40px;
+}
+.user-info-content {
+    padding-left: 10px;
+}
+.user-info-row span {
+    line-height: 40px;
+}
+.user-info-row > th {
+    background-color: rgb(198, 224, 180);
+}
+.user-info-row > td {
+    background-color: rgb(255, 255, 255);
+}
+.form-custom {
+    display: inline-block;
+    width: auto;
+    flex-grow: 1;
+}
+#alert-fail, #alert-success, #alert-proceeding {
+    display: none;
 }

@@ -1,35 +1,40 @@
 <html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
 <div layout:fragment="content">
   <!-- 구현 -->
-  <div class="container my-3">
+  <div class="list-container my-3">
+    <div class="my-3 border-bottom">
+      <div>
+        <h4>자유게시판</h4>
+      </div>
+    </div>
     <div class="row my-3">
       <!-- 질문 등록 버튼 -->
       <div class="col-6">
-        <a class="btn btn-secondary" th:href="@{/question/create}">질문 등록하기</a>
+        <a class="btn btn-secondary" th:href="@{/question/create}">글쓰기</a>
       </div>
       <!-- 검색 창 -->
       <div class="col-6">
         <div class="input-group">
           <input type="text" id="search_keyWord" class="form-control" th:value="${keyWord}">
-          <button type="button" id="btn_search" class="btn btn-outline-secondary">찾기</button>
+          <button type="button" id="btn_search" class="btn btn-outline-secondary">검색</button>
         </div>
       </div>
     </div>
     <!-- model로 전달된 questionList 데이터로 질문 리스트 출력 -->
     <!-- 제목 / 작성일시 -->
-    <table class="table">
-      <thead class="table-secondary">
+    <table class="table round-top">
+      <thead class="header-color">
       <tr class="text-center">
         <th>번호</th>
         <th>분류</th>
         <th style="width: 50%">제목</th>
         <th>글쓴이</th>
         <th>날짜</th>
-        <th>조회수</th>
-        <th>♥︎</th>
+        <th><i class="fa-solid fa-eye"></i></th>
+        <th><i class="fa-solid fa-thumbs-up"></i></th>
       </tr>
       </thead>
-      <tbody>
+      <tbody class="content-color">
       <tr th:each="question, loop : ${paging}" class="text-center">
         <!-- 게시물 번호 역순으로 출력; 총 게시물 수 ~ 총 게시물 수 - (페이징 개수 - 1 ~= loop.index) -->
         <!-- 페이지 증가 시 처음 오는 번호는 총 게시물 수 - (현재 페이지 * 페이징 개수) -->
@@ -50,7 +55,7 @@
         <td>
           <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
         </td>
-        <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${@commonUtil.timeDifference(question.createDate)}"></td>
         <td th:text="${question.hit}"></td>
         <td th:text="${#lists.size(question.voter)}"></td>
       </tr>

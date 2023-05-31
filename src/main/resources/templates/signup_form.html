@@ -1,7 +1,8 @@
 <html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
 <div layout:fragment="content">
     <!-- 구현 -->
-    <div class="container my-3">
+    <!-- signup form -->
+    <div class="form-container my-3">
         <div class="my-3 border-bottom">
             <div>
                 <h4>회원가입</h4>
@@ -9,24 +10,77 @@
         </div>
         <form th:action="@{/user/signup}" th:object="${userCreateForm}" method="post">
             <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+            <div id="alert-fail">
+                <div class="alert alert-danger">
+                    이메일을 확인해 주세요.
+                </div>
+            </div>
+            <div id="alert-proceeding">
+                <div class="alert alert-secondary">
+                    <span>입력하신 이메일 주소를 확인중입니다.</span><br>
+                    <span>잠시만 기다려주세요.</span>
+                </div>
+            </div>
+            <div id="alert-success">
+                <div class="alert alert-success">
+                    <span>입력하신 이메일 주소로 인증코드를 발송하였습니다.</span><br>
+                    <span>인증번호를 입력 후 회원가입을 완료해주세요.</span>
+                </div>
+            </div>
             <div class="mb-3">
                 <label for="username" class="form-label">사용자ID</label>
-                <input type="text" th:field="*{username}" class="form-control">
+                <input type="text" th:field="*{username}" class="form-control" placeholder="사용자ID를 입력해주세요.">
             </div>
             <div class="mb-3">
                 <label for="password1" class="form-label">비밀번호</label>
-                <input type="password" th:field="*{password1}" class="form-control">
+                <input type="password" th:field="*{password1}" class="form-control" placeholder="비밀번호를 입력해주세요.">
             </div>
             <div class="mb-3">
                 <label for="password2" class="form-label">비밀번호 확인</label>
-                <input type="password" th:field="*{password2}" class="form-control">
+                <input type="password" th:field="*{password2}" class="form-control" placeholder="비밀번호 확인을 입력해주세요.">
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">이메일</label>
-                <input type="email" th:field="*{email}" class="form-control">
+                <div class="d-flex">
+                    <input type="email" th:field="*{email}" class="form-control form-custom me-2" placeholder="이메일을 입력해주세요.">
+                    <button type="button" class="btn btn-secondary" onclick="emailConfirm();">인증하기</button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-secondary">회원가입</button>
+            <div class="mb-3">
+                <label for="inputCode" class="form-label">인증번호</label>
+                <input type="text" th:field="*{inputCode}" class="form-control" placeholder="이메일로 발송된 인증번호를 입력해주세요.">
+            </div>
+            <input type="hidden" th:field=*{genCode} class="form-control">
+            <button type="submit" class="btn btn-secondary">가입하기</button>
         </form>
     </div>
 </div>
+<script layout:fragment="script" type='text/javascript'>
+  function emailConfirm() {
+    $("#alert-fail").css("display", "none");
+    $("#alert-success").css("display", "none");
+    $("#alert-proceeding").css("display", "block");
+    $.ajax({
+        url : "/user/signup/emailConfirm",
+        type : "POST",
+        data : {
+          "email" : $("#email").val()
+        },
+        beforeSend : function() {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) { xhr.setRequestHeader(header, token); });
+        },
+        success : function(data) {
+            $("input[name=genCode]").attr("value", data);
+            $("#alert-proceeding").css("display", "none");
+            $("#alert-success").css("display", "block");
+        },
+        error : function(data) {
+            $("#alert-proceeding").css("display", "none");
+            $("#alert-fail").css("display", "block");
+        }
+    })
+  }
+</script>
 </html>

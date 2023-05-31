@@ -95,4 +95,13 @@ public class AnswerController {
         this.answerService.vote(answer, voter);
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s", answer.getQuestion().getId(), page, answer.getId());
     }
+
+    @PostMapping("/goto")
+    @ResponseBody
+    public String getUri(@RequestParam("id") Integer id) {
+        Answer answer = this.answerService.getAnswer(id);
+        Question question = answer.getQuestion();
+        int page = this.answerService.getPage(id, question);
+        return String.format("/question/detail/%s?page=%s#answer_%s", answer.getQuestion().getId(), page, answer.getId());
+    }
 }

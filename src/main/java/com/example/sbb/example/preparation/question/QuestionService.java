@@ -62,13 +62,25 @@ public class QuestionService {
         }
     }
 
-    public void create(String subject, String content, SiteUser author) {
+    public List<Question> getBestQuestion() {
+        return this.questionRepository.findTop10SortByVoterCount();
+    }
+
+    public Page<Question> getListByUser(int page, SiteUser user) {
+        // order by createDate desc;
+        List<Sort.Order> sorts = new ArrayList<>(); // 정렬 조건을 저장할 수 있는 Sort.Order 객체로 구성된 List 선언
+        sorts.add(Sort.Order.desc("createDate")); // createDate 속성을 내림차순으로 정렬하는 정렬 조건을 List에 저장
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts)); // 정렬 조건들이 담긴 List를 넘겨주면 해당 조건에 맞게 정렬 후 해당 페이지를 반환
+        return this.questionRepository.findAllByAuthor(user, pageable);
+    }
+
+    public void create(String subject, String content, SiteUser author, String category) {
         Question question = new Question();
         question.setSubject(subject);
         question.setContent(content);
         question.setCreateDate(LocalDateTime.now());
         question.setAuthor(author);
-        question.setCategory(this.categoryRepository.findByType("질문")); // 임시로 나중에 게시판 확장하면 변경 예정
+        question.setCategory(this.categoryRepository.findByType(category)); // 임시로 나중에 게시판 확장하면 변경 예정
         question.setHit(0);
         this.questionRepository.save(question);
     }
