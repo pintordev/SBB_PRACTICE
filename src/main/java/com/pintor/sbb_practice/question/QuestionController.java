@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -146,10 +147,9 @@ public class QuestionController {
 
         String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
         String referUri = refer.replaceFirst(path, "");
-        System.out.println(referUri);
 
         // 게시판에서 접근한 경우가 아니면 reject
-        if (!referUri.equals("/question/list") && !referUri.equals("/sbb") && !referUri.startsWith("/user/mypage")) return false;
+        if (!refer.contains("/question/list") && !refer.contains("/index") && !refer.contains("/user/mypage")) return false;
 
         Cookie oldCookie = null;
 
