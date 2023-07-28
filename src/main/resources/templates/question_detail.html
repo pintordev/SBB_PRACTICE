@@ -37,7 +37,7 @@
                         <a href="javascript:void(0);"
                            th:data-url="@{|/question/delete/${question.id}|}" sec:authorize="isAuthenticated()"
                            th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                           class="font-sub" title="삭제"><i class="fa-solid fa-trash"></i></a>
+                           class="delete font-sub" title="삭제"><i class="fa-solid fa-trash"></i></a>
                     </div>
                 </div>
                 <div name="article-eval">
@@ -58,7 +58,7 @@
                     </a>
                 </div>
             </div>
-            <!-- 내용 출력 및 수정/삭제 버튼 -->
+            <!-- 내용 출력 및 추천 버튼 -->
             <div class="card-body">
                 <div class="card-text w-95p" th:utext="${@commonUtil.markdown(question.content)}"></div>
                 <div class="text-center">
