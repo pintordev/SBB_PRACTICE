@@ -22,6 +22,7 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
             + "left outer join question_voter qv on q.id = qv.question_id "
             + "group by q.id, qv.question_id "
             + "order by voter_count desc, q.create_date desc "
+            + "limit 10 "
             , countQuery = "select count(*) from question"
             , nativeQuery = true)
     List<Question> findTop10SortByVoterCount();
