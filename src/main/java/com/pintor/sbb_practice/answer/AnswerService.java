@@ -33,7 +33,7 @@ public class AnswerService {
             Pageable pageable = PageRequest.of(page, 10);
             return this.answerRepository.findAllByQuestionSortByCommentCount(question.getId(), pageable);
         } else {
-            sorts.add(Sort.Order.desc("createDate")); // createDate 속성을 내림차순으로 정렬하는 정렬 조건을 List에 저장
+            sorts.add(Sort.Order.asc("createDate")); // createDate 속성을 내림차순으로 정렬하는 정렬 조건을 List에 저장
             Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts)); // 정렬 조건들이 담긴 List를 넘겨주면 해당 조건에 맞게 정렬 후 해당 페이지를 반환
             return this.answerRepository.findAllByQuestion(question, pageable);
         }
