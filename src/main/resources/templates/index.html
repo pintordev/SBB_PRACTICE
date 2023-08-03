@@ -67,7 +67,7 @@
                        th:data-id="${answer.id}"
                        th:utext="${@commonUtil.markdown(answer.content)}"
                        class="getPage d-flex"></a>
-                    <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
+                    <span th:if="${@commonUtil.getAnswerCommentCount(question.id) > 0}" th:text="${@commonUtil.getAnswerCommentCount(question.id)}"
                           class="text-danger small ms-2"></span>
                 </td>
                 <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
