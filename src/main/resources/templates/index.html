@@ -65,7 +65,7 @@
                     <a href="javascript:void(0);"
                        th:data-element="answer"
                        th:data-id="${answer.id}"
-                       th:text="${answer.content}"
+                       th:utext="${@commonUtil.markdown(answer.content)}"
                        class="getPage"></a>
                     <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
                           class="text-danger small ms-2"></span>
@@ -100,7 +100,7 @@
                     <a href="javascript:void(0);"
                        th:data-element="comment"
                        th:data-id="${comment.id}"
-                       th:text="${comment.content}"
+                       th:utext="${@commonUtil.markdown(comment.content)}"
                        class="getPage"></a>
                 </td>
                 <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
