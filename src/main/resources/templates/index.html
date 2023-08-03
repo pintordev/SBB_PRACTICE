@@ -31,7 +31,7 @@
                     <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
                     <!-- 질문 제목 오른쪽에 작은 글씨로 답변 개수 표기 -->
                     <!-- 질문에 답변이 없을 경우 표기하지 않는다 -->
-                    <span th:if="${#lists.size(question.answerList) > 0}" th:text="${#lists.size(question.answerList)}"
+                    <span th:if="${@commonUtil.getAnswerCommentCount(question.id) > 0}" th:text="${@commonUtil.getAnswerCommentCount(question.id)}"
                           class="text-danger small ms-2"></span>
                 </td>
                 <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
@@ -67,7 +67,7 @@
                        th:data-id="${answer.id}"
                        th:utext="${@commonUtil.markdown(answer.content)}"
                        class="getPage d-flex"></a>
-                    <span th:if="${@commonUtil.getAnswerCommentCount(question.id) > 0}" th:text="${@commonUtil.getAnswerCommentCount(question.id)}"
+                    <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
                           class="text-danger small ms-2"></span>
                 </td>
                 <!-- 작가 이름 표기 (없을 시 표기하지 않음) -->
