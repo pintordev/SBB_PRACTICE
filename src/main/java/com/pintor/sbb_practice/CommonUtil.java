@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class CommonUtil {
 
-    private QuestionService questionService;
+    private final QuestionService questionService;
 
     public String markdown(String markdown) {
         Parser parser = Parser.builder().build();
