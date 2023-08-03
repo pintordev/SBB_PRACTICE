@@ -82,7 +82,7 @@
                 <!-- 답변 개수 표시 -->
                 <div>
                     <span>답변</span>
-                    <span th:text="${#lists.size(question.answerList)}" class="text-danger"></span>
+                    <span th:text="${@commonUtil.getAnswerCommentCount(question.id)}" class="text-danger"></span>
                     <div class="d-inline-block w-5"></div>
                     <!-- 최신순, 추천순, 댓글순 -->
                     <div class="button-box d-inline-block font-none">
