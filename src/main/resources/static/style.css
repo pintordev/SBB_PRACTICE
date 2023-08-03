@@ -2,6 +2,10 @@ a {
     text-decoration: none;
     color: inherit;
 }
+p {
+    margin: 0;
+    padding: 0;
+}
 a.hover-none:hover {
     color: rgb(128, 128, 128);
 }
