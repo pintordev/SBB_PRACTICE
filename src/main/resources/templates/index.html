@@ -61,7 +61,7 @@
             <tbody class="content-color">
             <tr th:each="answer : ${answerList}" class="text-center">
                 <!-- 제목 클릭 시 해당 답변이 포함된 질문 상세 페이지로 이동가능하도록 -->
-                <td class="text-start">
+                <td class="text-start d-flex">
                     <a href="javascript:void(0);"
                        th:data-element="answer"
                        th:data-id="${answer.id}"
