@@ -352,7 +352,6 @@
     $("#pageForm").submit();
   }
   $("a.getPage").click(function() {
-    alert(this.dataset.element);
     $.ajax({
         url : "/" + this.dataset.element + "/goto",
         type : "POST",
