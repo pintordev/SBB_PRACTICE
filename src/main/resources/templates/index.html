@@ -66,7 +66,7 @@
                        th:data-element="answer"
                        th:data-id="${answer.id}"
                        th:utext="${@commonUtil.markdown(answer.content)}"
-                       class="getPage"></a>
+                       class="getPage d-flex"></a>
                     <span th:if="${#lists.size(answer.commentList) > 0}" th:text="${#lists.size(answer.commentList)}"
                           class="text-danger small ms-2"></span>
                 </td>
